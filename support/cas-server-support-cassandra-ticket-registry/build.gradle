@@ -10,4 +10,5 @@ dependencies {
     compile libraries.jackson
 
     testCompile libraries.tests
+    testCompile project(path: ":core:cas-server-core-tickets", configuration: "tests")
 }

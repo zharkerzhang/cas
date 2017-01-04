@@ -13,7 +13,6 @@ import org.junit.runners.Suite;
  * @author Misagh Moayyed
  * @since 4.2.0
  */
-
 @RunWith(Suite.class)
 @Suite.SuiteClasses({QueryAndEncodeDatabaseAuthenticationHandlerTests.class, QueryDatabaseAuthenticationHandlerTests.class,
         SearchModeSearchDatabaseAuthenticationHandlerTests.class})

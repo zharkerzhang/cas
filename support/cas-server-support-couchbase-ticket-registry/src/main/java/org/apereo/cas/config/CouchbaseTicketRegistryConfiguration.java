@@ -6,11 +6,10 @@ import org.apereo.cas.configuration.support.Beans;
 import org.apereo.cas.couchbase.core.CouchbaseClientFactory;
 import org.apereo.cas.logout.LogoutManager;
 import org.apereo.cas.ticket.registry.CouchbaseTicketRegistry;
-import org.apereo.cas.ticket.registry.DefaultTicketRegistryCleaner;
 import org.apereo.cas.ticket.registry.NoOpLockingStrategy;
+import org.apereo.cas.ticket.registry.NoOpTicketRegistryCleaner;
 import org.apereo.cas.ticket.registry.TicketRegistry;
 import org.apereo.cas.ticket.registry.TicketRegistryCleaner;
-import org.apereo.cas.ticket.registry.support.LockingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -62,25 +61,7 @@ public class CouchbaseTicketRegistryConfiguration {
 
     @Bean
     public TicketRegistryCleaner ticketRegistryCleaner() {
-        final boolean isCleanerEnabled = casProperties.getTicket().getRegistry().getCleaner().isEnabled();
-        return new CouchbaseTicketRegistryCleaner(new NoOpLockingStrategy(), logoutManager, couchbaseTicketRegistry(), isCleanerEnabled);
-    }
+        return new NoOpTicketRegistryCleaner(new NoOpLockingStrategy(), logoutManager, couchbaseTicketRegistry(), false);
 
-    /**
-     * The type Couchbase ticket registry cleaner.
-     */
-    public static class CouchbaseTicketRegistryCleaner extends DefaultTicketRegistryCleaner {
-
-        public CouchbaseTicketRegistryCleaner(final LockingStrategy lockingStrategy, 
-                                              final LogoutManager logoutManager, 
-                                              final TicketRegistry ticketRegistry,
-                                              final boolean isCleanerEnabled) {
-            super(lockingStrategy, logoutManager, ticketRegistry, isCleanerEnabled);
-        }
-
-        @Override
-        protected boolean isCleanerSupported() {
-            return false;
-        }
     }
 }

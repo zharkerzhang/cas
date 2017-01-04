@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -31,7 +30,8 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner {
     private final LockingStrategy lockingStrategy;
     private final boolean isCleanerEnabled;
 
-    public DefaultTicketRegistryCleaner(final LockingStrategy lockingStrategy, final LogoutManager logoutManager, 
+    public DefaultTicketRegistryCleaner(final LockingStrategy lockingStrategy, 
+                                        final LogoutManager logoutManager, 
                                         final TicketRegistry ticketRegistry,
                                         final boolean isCleanerEnabled) {
 
@@ -46,7 +46,6 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner {
     @Override
     public void clean() {
         try {
-            SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
             if (!isCleanerEnabled) {
                 LOGGER.trace("Ticket registry cleaner is disabled for {}. No cleaner processes will run.",
                         this.ticketRegistry.getClass().getSimpleName());

@@ -11,7 +11,6 @@ import java.util.Collection;
 
 /**
  * @author David Rodriguez
- *
  * @since 5.1.0
  */
 public class CassandraTicketRegistry extends AbstractTicketRegistry {
@@ -38,12 +37,8 @@ public class CassandraTicketRegistry extends AbstractTicketRegistry {
     }
 
     @Override
-    public int deleteTicket(final String id) {
-        if (deleteSingleTicket(id)) {
-            return 1;
-        } else {
-            return 0;
-        }
+    public long deleteAll() {
+        return 0;
     }
 
     @Override
@@ -51,12 +46,12 @@ public class CassandraTicketRegistry extends AbstractTicketRegistry {
         LOGGER.debug("Deleting ticket {}", id);
         if (isTgt(id)) {
             return ticketRegistryDao.deleteTicketGrantingTicket(id);
-        } else if (isSt(id)) {
-            return ticketRegistryDao.deleteServiceTicket(id);
-        } else {
-            LOGGER.error("Deleting unknown ticket type {}", id);
-            return false;
         }
+        if (isSt(id)) {
+            return ticketRegistryDao.deleteServiceTicket(id);
+        }
+        LOGGER.error("Deleting unknown ticket type {}", id);
+        return false;
     }
 
     @Override
@@ -64,12 +59,12 @@ public class CassandraTicketRegistry extends AbstractTicketRegistry {
         LOGGER.debug("Querying ticket {}", id);
         if (isTgt(id)) {
             return ticketRegistryDao.getTicketGrantingTicket(id);
-        } else if (isSt(id)) {
-            return ticketRegistryDao.getServiceTicket(id);
-        } else {
-            LOGGER.error("Requesting unknown ticket type {}", id);
-            return null;
         }
+        if (isSt(id)) {
+            return ticketRegistryDao.getServiceTicket(id);
+        }
+        LOGGER.error("Requesting unknown ticket type {}", id);
+        return null;
     }
 
     @Override

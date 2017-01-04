@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry.dao;
 
+import org.apereo.cas.ticket.Tickets;
 import org.apereo.cas.ticket.registry.serializer.JacksonStringTicketSerializer;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
@@ -41,7 +42,7 @@ public class DefaultCassandraTicketRegistryDaoJacksonStringSerializationTests {
 
     @Test
     public void shouldWorkWithAStringSerializer() throws Exception {
-        final TicketGrantingTicketImpl tgt = TicketCreatorUtils.defaultTGT("id");
+        final TicketGrantingTicketImpl tgt = Tickets.createTicketGrantingTicket("id");
         dao.addTicketGrantingTicket(tgt);
         assertEquals(tgt, dao.getTicketGrantingTicket("id"));
     }
@@ -49,19 +50,19 @@ public class DefaultCassandraTicketRegistryDaoJacksonStringSerializationTests {
     @Ignore("To be completed")
     @Test
     public void shouldReturnExpiredTGTs() throws Exception {
-        //given
-        final TicketGrantingTicketImpl firstExpired = TicketCreatorUtils.expiredTGT("expired1");
-        final TicketGrantingTicketImpl secondExpired = TicketCreatorUtils.expiredTGT("expired2");
-        final TicketGrantingTicketImpl notExpired = TicketCreatorUtils.defaultTGT("notExpired");
+        // given
+        final TicketGrantingTicket firstExpired = Tickets.createExpiredTicketGrantingTicket("expired1");
+        final TicketGrantingTicket secondExpired = Tickets.createExpiredTicketGrantingTicket("expired2");
+        final TicketGrantingTicket notExpired = Tickets.createTicketGrantingTicket("notExpired");
 
         dao.addTicketGrantingTicket(firstExpired);
         dao.addTicketGrantingTicket(secondExpired);
         dao.addTicketGrantingTicket(notExpired);
 
-        //when
+        // when
         final Stream<TicketGrantingTicket> expiredTgts = dao.getExpiredTicketGrantingTickets();
 
-        //then
+        // then
         final long expiredTgtsInserted = 2;
         assertThat(expiredTgts.count(), is(expiredTgtsInserted));
     }

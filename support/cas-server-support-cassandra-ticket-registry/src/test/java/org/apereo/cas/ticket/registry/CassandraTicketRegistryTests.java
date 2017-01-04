@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry;
 
+import org.apereo.cas.ticket.Tickets;
 import org.apereo.cas.ticket.registry.serializer.JacksonStringTicketSerializer;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
 import org.apereo.cas.ticket.registry.dao.CassandraTicketRegistryDao;
@@ -40,7 +41,7 @@ public class CassandraTicketRegistryTests {
     public void shouldRetrieveATicket() throws Exception {
         final CassandraTicketRegistry ticketRegistry = new CassandraTicketRegistry(dao);
         final String ticketId = "TGT-1234";
-        final TicketGrantingTicketImpl ticket = TicketCreatorUtils.defaultTGT(ticketId);
+        final TicketGrantingTicketImpl ticket = Tickets.createTicketGrantingTicket(ticketId);
         ticketRegistry.addTicket(ticket);
 
         assertEquals(ticket, ticketRegistry.getTicket(ticketId));

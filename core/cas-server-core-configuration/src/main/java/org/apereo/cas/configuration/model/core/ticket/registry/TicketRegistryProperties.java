@@ -9,6 +9,7 @@ import org.apereo.cas.configuration.model.support.ignite.IgniteProperties;
 import org.apereo.cas.configuration.model.support.infinispan.InfinispanProperties;
 import org.apereo.cas.configuration.model.support.jpa.ticketregistry.JpaTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.memcached.MemcachedTicketRegistryProperties;
+import org.apereo.cas.configuration.model.support.mongo.ticketregistry.MongoTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.redis.RedisTicketRegistryProperties;
 import org.apereo.cas.configuration.support.Beans;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -25,8 +26,10 @@ public class TicketRegistryProperties {
     private InfinispanProperties infinispan = new InfinispanProperties();
 
     @NestedConfigurationProperty
-    private CouchbaseTicketRegistryProperties couchbase =
-            new CouchbaseTicketRegistryProperties();
+    private CouchbaseTicketRegistryProperties couchbase = new CouchbaseTicketRegistryProperties();
+
+    @NestedConfigurationProperty
+    private MongoTicketRegistryProperties mongo = new MongoTicketRegistryProperties();
 
     @NestedConfigurationProperty
     private EhcacheProperties ehcache = new EhcacheProperties();
@@ -52,12 +55,20 @@ public class TicketRegistryProperties {
     private InMemory inMemory = new InMemory();
     private Cleaner cleaner = new Cleaner();
 
-    public CassandraProperties getCassandra() {
-        return cassandra;
+    public MongoTicketRegistryProperties getMongo() {
+        return mongo;
     }
 
     public void setCassandra(final CassandraProperties cassandra) {
         this.cassandra = cassandra;
+    }
+
+    public CassandraProperties getCassandra() {
+        return cassandra;
+    }
+
+    public void setMongo(final MongoTicketRegistryProperties mongo) {
+        this.mongo = mongo;
     }
 
     public InMemory getInMemory() {

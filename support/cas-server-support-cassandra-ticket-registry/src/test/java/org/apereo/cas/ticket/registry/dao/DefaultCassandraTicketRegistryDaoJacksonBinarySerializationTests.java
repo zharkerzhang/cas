@@ -1,5 +1,6 @@
 package org.apereo.cas.ticket.registry.dao;
 
+import org.apereo.cas.ticket.Tickets;
 import org.apereo.cas.ticket.registry.serializer.JacksonBinaryTicketSerializer;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
 import org.cassandraunit.CassandraCQLUnit;
@@ -33,7 +34,7 @@ public class DefaultCassandraTicketRegistryDaoJacksonBinarySerializationTests {
                 "cas.ticket_cleaner", 
                 "cas.ticket_cleaner_lastrun");
 
-        final TicketGrantingTicketImpl tgt = TicketCreatorUtils.defaultTGT("id");
+        final TicketGrantingTicketImpl tgt = Tickets.createTicketGrantingTicket("id");
         dao.addTicketGrantingTicket(tgt);
         assertEquals(tgt, dao.getTicketGrantingTicket("id"));
     }
