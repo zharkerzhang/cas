@@ -2,6 +2,7 @@ package org.apereo.cas.dao;
 
 import org.apereo.cas.serializer.JacksonBinarySerializer;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
+import org.apereo.cas.ticket.registry.dao.DefaultCassandraTicketRegistryDao;
 import org.apereo.cas.utils.TicketCreatorUtils;
 import org.cassandraunit.CassandraCQLUnit;
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;

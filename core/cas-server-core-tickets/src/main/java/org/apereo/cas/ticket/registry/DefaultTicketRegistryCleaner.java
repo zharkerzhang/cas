@@ -25,12 +25,14 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTicketRegistryCleaner.class);
 
-    private final LogoutManager logoutManager;
+    protected final LogoutManager logoutManager;
+    
     private final TicketRegistry ticketRegistry;
     private final LockingStrategy lockingStrategy;
     private final boolean isCleanerEnabled;
 
-    public DefaultTicketRegistryCleaner(final LockingStrategy lockingStrategy, final LogoutManager logoutManager, final TicketRegistry ticketRegistry,
+    public DefaultTicketRegistryCleaner(final LockingStrategy lockingStrategy, final LogoutManager logoutManager, 
+                                        final TicketRegistry ticketRegistry,
                                         final boolean isCleanerEnabled) {
 
         this.lockingStrategy = lockingStrategy;
@@ -63,29 +65,7 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner {
                 return;
             }
             LOGGER.debug("Acquired lock.  Proceeding with cleanup.");
-           
-            final Collection<Ticket> ticketsToRemove = ticketRegistry.getTickets()
-                    .stream()
-                    .filter(Ticket::isExpired)
-                    .collect(Collectors.toSet());
-            LOGGER.debug("{} expired tickets found.", ticketsToRemove.size());
-
-            int count = 0;
-
-            for (final Ticket ticket : ticketsToRemove) {
-                if (ticket instanceof TicketGrantingTicket) {
-                    LOGGER.debug("Cleaning up expired ticket-granting ticket [{}]", ticket.getId());
-                    logoutManager.performLogout((TicketGrantingTicket) ticket);
-                    count += ticketRegistry.deleteTicket(ticket.getId());
-                } else if (ticket instanceof ServiceTicket) {
-                    LOGGER.debug("Cleaning up expired service ticket [{}]", ticket.getId());
-                    count += ticketRegistry.deleteTicket(ticket.getId());
-                } else {
-                    LOGGER.warn("Unknown ticket type [{} found to clean", ticket.getClass().getSimpleName());
-                }
-            }
-            LOGGER.info("{} expired tickets removed.", count);
-
+            cleanInternal();
         } catch (final Exception e) {
             LOGGER.error(e.getMessage(), e);
         } finally {
@@ -93,6 +73,33 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner {
             this.lockingStrategy.release();
             LOGGER.debug("Finished ticket cleanup.");
         }
+    }
+
+    /**
+     * Start cleaning tickets from the registry.
+     */
+    protected void cleanInternal() {
+        final Collection<Ticket> ticketsToRemove = ticketRegistry.getTickets()
+                .stream()
+                .filter(Ticket::isExpired)
+                .collect(Collectors.toSet());
+        LOGGER.debug("{} expired tickets found.", ticketsToRemove.size());
+
+        int count = 0;
+
+        for (final Ticket ticket : ticketsToRemove) {
+            if (ticket instanceof TicketGrantingTicket) {
+                LOGGER.debug("Cleaning up expired ticket-granting ticket [{}]", ticket.getId());
+                logoutManager.performLogout((TicketGrantingTicket) ticket);
+                count += ticketRegistry.deleteTicket(ticket.getId());
+            } else if (ticket instanceof ServiceTicket) {
+                LOGGER.debug("Cleaning up expired service ticket [{}]", ticket.getId());
+                count += ticketRegistry.deleteTicket(ticket.getId());
+            } else {
+                LOGGER.warn("Unknown ticket type [{} found to clean", ticket.getClass().getSimpleName());
+            }
+        }
+        LOGGER.info("{} expired tickets removed.", count);
     }
 
     /**

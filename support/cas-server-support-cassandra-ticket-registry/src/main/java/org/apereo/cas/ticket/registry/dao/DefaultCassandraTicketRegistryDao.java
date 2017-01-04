@@ -1,4 +1,4 @@
-package org.apereo.cas.dao;
+package org.apereo.cas.ticket.registry.dao;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.ConsistencyLevel;
@@ -6,11 +6,10 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import org.apereo.cas.TicketSerializer;
+import org.apereo.cas.serializer.TicketSerializer;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
-import org.apereo.cas.ticket.registry.CassandraTicketRegistryDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
