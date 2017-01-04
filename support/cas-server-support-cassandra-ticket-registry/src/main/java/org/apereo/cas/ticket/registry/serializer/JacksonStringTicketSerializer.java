@@ -1,4 +1,4 @@
-package org.apereo.cas.serializer;
+package org.apereo.cas.ticket.registry.serializer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -14,19 +14,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * @author David Rodriguez
  *
  * @since 5.1.0
  */
-public class JacksonBinarySerializer implements TicketSerializer<ByteBuffer> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonBinarySerializer.class);
+public class JacksonStringTicketSerializer implements TicketSerializer<String> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JacksonStringTicketSerializer.class);
     private ObjectMapper mapper;
 
-    public JacksonBinarySerializer() {
+    public JacksonStringTicketSerializer() {
         mapper = Jackson2ObjectMapperBuilder.json()
                 .featuresToDisable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -35,33 +33,29 @@ public class JacksonBinarySerializer implements TicketSerializer<ByteBuffer> {
     }
 
     @Override
-    public ByteBuffer serializeTGT(final Ticket ticket) {
-        byte[] serialized;
+    public String serializeTGT(final Ticket ticket) {
         try {
-            serialized = mapper.writeValueAsBytes(ticket);
+            return mapper.writeValueAsString(ticket);
         } catch (final JsonProcessingException e) {
             LOGGER.info("Error writing ticket {}: {}", ticket.getId(), e);
-            serialized = new byte[]{};
+            return "";
         }
-        return ByteBuffer.wrap(serialized);
     }
 
     @Override
-    public ByteBuffer serializeST(final Ticket ticket) {
-        byte[] serialized;
+    public String serializeST(final Ticket ticket) {
         try {
-            serialized = mapper.writeValueAsBytes(ticket);
+            return mapper.writeValueAsString(ticket);
         } catch (final JsonProcessingException e) {
             LOGGER.info("Error writing ticket {}: {}", ticket.getId(), e);
-            serialized = new byte[]{};
+            return "";
         }
-        return ByteBuffer.wrap(serialized);
     }
 
     @Override
-    public TicketGrantingTicket deserializeTGT(final ByteBuffer ticket) {
+    public TicketGrantingTicket deserializeTGT(final String ticket) {
         try {
-            return mapper.readValue(ticket.array(), TicketGrantingTicketImpl.class);
+            return mapper.readValue(ticket, TicketGrantingTicketImpl.class);
         } catch (final IOException e) {
             LOGGER.info("Error reading TGT: ", e);
             return null;
@@ -69,9 +63,9 @@ public class JacksonBinarySerializer implements TicketSerializer<ByteBuffer> {
     }
 
     @Override
-    public ServiceTicket deserializeST(final ByteBuffer ticket) {
+    public ServiceTicket deserializeST(final String ticket) {
         try {
-            return mapper.readValue(ticket.array(), ServiceTicketImpl.class);
+            return mapper.readValue(ticket, ServiceTicketImpl.class);
         } catch (final IOException e) {
             LOGGER.info("Error reading ST: ", e);
             return null;

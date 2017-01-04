@@ -1,10 +1,8 @@
-package org.apereo.cas.dao;
+package org.apereo.cas.ticket.registry.dao;
 
-import org.apereo.cas.serializer.JacksonJsonSerializer;
+import org.apereo.cas.ticket.registry.serializer.JacksonStringTicketSerializer;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
-import org.apereo.cas.ticket.registry.dao.DefaultCassandraTicketRegistryDao;
-import org.apereo.cas.utils.TicketCreatorUtils;
 import org.cassandraunit.CassandraCQLUnit;
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet;
 import org.junit.Before;
@@ -22,24 +20,29 @@ import static org.junit.Assert.*;
  *
  * @since 5.1.0
  */
-public class CassandraJsonTests {
+public class DefaultCassandraTicketRegistryDaoJacksonStringSerializationTests {
 
     @Rule
-    public CassandraCQLUnit cassandraUnit = new CassandraCQLUnit(new ClassPathCQLDataSet("schema.cql"), "cassandra.yaml", 120_000L);
+    public CassandraCQLUnit cassandraUnit = new CassandraCQLUnit(new ClassPathCQLDataSet("schema.cql"), 
+            "cassandra.yaml", 120_000L);
     private DefaultCassandraTicketRegistryDao<String> dao;
 
     @Before
     public void setUp() throws Exception {
-        dao = new DefaultCassandraTicketRegistryDao<>("localhost", "", "", new JacksonJsonSerializer(), String.class, "cas.ticketgrantingticket",
-                "cas.serviceticket", "cas.ticket_cleaner", "cas.ticket_cleaner_lastrun");
+        dao = new DefaultCassandraTicketRegistryDao<>("localhost", 
+                "", "", 
+                new JacksonStringTicketSerializer(), 
+                String.class, 
+                "cas.ticketgrantingticket",
+                "cas.serviceticket", 
+                "cas.ticket_cleaner", 
+                "cas.ticket_cleaner_lastrun");
     }
 
     @Test
     public void shouldWorkWithAStringSerializer() throws Exception {
         final TicketGrantingTicketImpl tgt = TicketCreatorUtils.defaultTGT("id");
-
         dao.addTicketGrantingTicket(tgt);
-
         assertEquals(tgt, dao.getTicketGrantingTicket("id"));
     }
 
@@ -56,7 +59,7 @@ public class CassandraJsonTests {
         dao.addTicketGrantingTicket(notExpired);
 
         //when
-        final Stream<TicketGrantingTicket> expiredTgts = dao.getExpiredTgts();
+        final Stream<TicketGrantingTicket> expiredTgts = dao.getExpiredTicketGrantingTickets();
 
         //then
         final long expiredTgtsInserted = 2;

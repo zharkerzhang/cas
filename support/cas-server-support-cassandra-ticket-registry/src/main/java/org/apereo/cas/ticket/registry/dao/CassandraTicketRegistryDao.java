@@ -102,5 +102,5 @@ public interface CassandraTicketRegistryDao {
      *
      * @return {@link Stream}
      */
-    Stream<TicketGrantingTicket> getExpiredTgts();
+    Stream<TicketGrantingTicket> getExpiredTicketGrantingTickets();
 }

@@ -6,7 +6,7 @@ import com.datastax.driver.core.PreparedStatement;
 import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import org.apereo.cas.serializer.TicketSerializer;
+import org.apereo.cas.ticket.registry.serializer.TicketSerializer;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
 import org.apereo.cas.ticket.TicketGrantingTicketImpl;
@@ -191,7 +191,7 @@ public class DefaultCassandraTicketRegistryDao<T> implements CassandraTicketRegi
     }
 
     @Override
-    public Stream<TicketGrantingTicket> getExpiredTgts() {
+    public Stream<TicketGrantingTicket> getExpiredTicketGrantingTickets() {
         final long lastRun = getLastRunTimestamp();
         final long currentTime = currentTimeBucket();
 

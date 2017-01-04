@@ -24,7 +24,7 @@ public class CassandraTicketRegistryCleaner extends DefaultTicketRegistryCleaner
 
     @Override
     protected void cleanInternal() {
-        this.ticketRegistryDao.getExpiredTgts().forEach(ticket -> {
+        this.ticketRegistryDao.getExpiredTicketGrantingTickets().forEach(ticket -> {
             this.logoutManager.performLogout(ticket);
             this.ticketRegistryDao.deleteTicketGrantingTicket(ticket.getId());
         });

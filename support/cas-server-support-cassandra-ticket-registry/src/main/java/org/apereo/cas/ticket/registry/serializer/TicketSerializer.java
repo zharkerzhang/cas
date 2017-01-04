@@ -1,4 +1,4 @@
-package org.apereo.cas.serializer;
+package org.apereo.cas.ticket.registry.serializer;
 
 import org.apereo.cas.ticket.ServiceTicket;
 import org.apereo.cas.ticket.Ticket;

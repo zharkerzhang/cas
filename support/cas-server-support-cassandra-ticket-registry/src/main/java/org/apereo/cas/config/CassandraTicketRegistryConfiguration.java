@@ -3,8 +3,8 @@ package org.apereo.cas.config;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.support.cassandra.CassandraProperties;
 import org.apereo.cas.logout.LogoutManager;
-import org.apereo.cas.serializer.JacksonJsonSerializer;
-import org.apereo.cas.serializer.TicketSerializer;
+import org.apereo.cas.ticket.registry.serializer.JacksonStringTicketSerializer;
+import org.apereo.cas.ticket.registry.serializer.TicketSerializer;
 import org.apereo.cas.ticket.registry.CassandraTicketRegistry;
 import org.apereo.cas.ticket.registry.CassandraTicketRegistryCleaner;
 import org.apereo.cas.ticket.registry.NoOpLockingStrategy;
@@ -36,7 +36,7 @@ public class CassandraTicketRegistryConfiguration {
     @ConditionalOnMissingBean(name = "cassandraTicketSerializer")
     @Bean
     public TicketSerializer cassandraTicketSerializer() {
-        return new JacksonJsonSerializer();
+        return new JacksonStringTicketSerializer();
     }
 
     @Bean
