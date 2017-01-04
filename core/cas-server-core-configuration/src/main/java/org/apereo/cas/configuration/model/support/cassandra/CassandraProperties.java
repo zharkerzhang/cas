@@ -1,6 +1,4 @@
-package org.apereo.cas.config;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
+package org.apereo.cas.configuration.model.support.cassandra;
 
 /**
  * This is {@link CassandraProperties}.
@@ -8,7 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author David Rodriguez
  * @since 5.1.0
  */
-@ConfigurationProperties("cassandra")
 public class CassandraProperties {
 
     private String contactPoints;

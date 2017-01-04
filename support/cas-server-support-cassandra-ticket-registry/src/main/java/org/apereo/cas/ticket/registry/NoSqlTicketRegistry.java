@@ -1,9 +1,8 @@
-package org.apereo.cas.dao;
+package org.apereo.cas.ticket.registry;
 
 import org.apereo.cas.ticket.ServiceTicket;
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
-import org.apereo.cas.ticket.registry.AbstractTicketRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,9 +17,9 @@ public class NoSqlTicketRegistry extends AbstractTicketRegistry {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NoSqlTicketRegistry.class);
 
-    private NoSqlTicketRegistryDao ticketRegistryDao;
+    private CassandraTicketRegistryDao ticketRegistryDao;
 
-    public NoSqlTicketRegistry(final NoSqlTicketRegistryDao ticketRegistryDao) {
+    public NoSqlTicketRegistry(final CassandraTicketRegistryDao ticketRegistryDao) {
         this.ticketRegistryDao = ticketRegistryDao;
     }
 

@@ -1,6 +1,7 @@
 package org.apereo.cas.configuration.model.core.ticket.registry;
 
 import org.apereo.cas.configuration.model.core.util.CryptographyProperties;
+import org.apereo.cas.configuration.model.support.cassandra.CassandraProperties;
 import org.apereo.cas.configuration.model.support.couchbase.ticketregistry.CouchbaseTicketRegistryProperties;
 import org.apereo.cas.configuration.model.support.ehcache.EhcacheProperties;
 import org.apereo.cas.configuration.model.support.hazelcast.HazelcastProperties;
@@ -34,6 +35,9 @@ public class TicketRegistryProperties {
     private HazelcastProperties hazelcast = new HazelcastProperties();
 
     @NestedConfigurationProperty
+    private CassandraProperties cassandra = new CassandraProperties();
+
+    @NestedConfigurationProperty
     private IgniteProperties ignite = new IgniteProperties();
 
     @NestedConfigurationProperty
@@ -47,6 +51,14 @@ public class TicketRegistryProperties {
 
     private InMemory inMemory = new InMemory();
     private Cleaner cleaner = new Cleaner();
+
+    public CassandraProperties getCassandra() {
+        return cassandra;
+    }
+
+    public void setCassandra(final CassandraProperties cassandra) {
+        this.cassandra = cassandra;
+    }
 
     public InMemory getInMemory() {
         return inMemory;

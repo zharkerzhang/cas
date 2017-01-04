@@ -9,8 +9,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * @author David Rodriguez
  *
@@ -20,11 +18,11 @@ public class NoSqlTicketRegistryTests {
 
     @Rule
     public CassandraCQLUnit cassandraUnit = new CassandraCQLUnit(new ClassPathCQLDataSet("schema.cql"), "cassandra.yaml", 120_000L);
-    private CassandraDao<String> dao;
+    private DefaultCassandraTicketRegistryDao<String> dao;
 
     @Before
     public void setUp() throws Exception {
-        dao = new CassandraDao<>("localhost", "", "", new JacksonJsonSerializer(), String.class, "cas.ticketgrantingticket",
+        dao = new DefaultCassandraTicketRegistryDao<>("localhost", "", "", new JacksonJsonSerializer(), String.class, "cas.ticketgrantingticket",
                 "cas.serviceticket", "cas.ticket_cleaner", "cas.ticket_cleaner_lastrun");
     }
 

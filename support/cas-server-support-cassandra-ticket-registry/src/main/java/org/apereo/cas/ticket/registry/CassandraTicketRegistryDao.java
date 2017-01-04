@@ -1,4 +1,4 @@
-package org.apereo.cas.dao;
+package org.apereo.cas.ticket.registry;
 
 import org.apereo.cas.ticket.Ticket;
 import org.apereo.cas.ticket.TicketGrantingTicket;
@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  *
  * @since 5.1.0
  */
-public interface NoSqlTicketRegistryDao {
+public interface CassandraTicketRegistryDao {
 
     /**
      * save a ticketGrantingTicket.

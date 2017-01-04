@@ -1,7 +1,6 @@
-package org.apereo.cas.dao;
+package org.apereo.cas.ticket.registry;
 
 import org.apereo.cas.logout.LogoutManager;
-import org.apereo.cas.ticket.registry.TicketRegistryCleaner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -12,10 +11,10 @@ import org.springframework.scheduling.annotation.Scheduled;
  */
 public class CassandraTicketRegistryCleaner implements TicketRegistryCleaner {
 
-    private final NoSqlTicketRegistryDao ticketRegistryDao;
+    private final CassandraTicketRegistryDao ticketRegistryDao;
     private final LogoutManager logoutManager;
 
-    public CassandraTicketRegistryCleaner(@Qualifier("cassandraDao") final NoSqlTicketRegistryDao ticketRegistryDao, final LogoutManager logoutManager) {
+    public CassandraTicketRegistryCleaner(@Qualifier("cassandraDao") final CassandraTicketRegistryDao ticketRegistryDao, final LogoutManager logoutManager) {
         this.ticketRegistryDao = ticketRegistryDao;
         this.logoutManager = logoutManager;
     }
