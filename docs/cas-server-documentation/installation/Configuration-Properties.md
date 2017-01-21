@@ -733,8 +733,21 @@ To learn more about this topic, [please review this guide](Configuring-RiskBased
 # cas.authn.adaptive.risk.response.sms.from=
 # cas.authn.adaptive.risk.response.sms.text=
 # cas.authn.adaptive.risk.response.sms.attributeName=phone
-# cas.authn.adaptive.risk.response.sms.twilio.accountId=
-# cas.authn.adaptive.risk.response.sms.twilio.token=
+```
+## Sms Messaging
+
+### Twillio
+
+```properties
+# cas.twilio.accountId=
+# cas.twilio.token=
+```
+
+### TextMagic
+
+```properties
+# cas.textMagic.username=
+# cas.textMagic.token=
 ```
 
 ## GoogleMaps GeoTracking
@@ -795,7 +808,7 @@ To learn more about this topic, [please review this guide](RADIUS-Authentication
 # cas.authn.radius.failoverOnException=false
 # cas.authn.radius.failoverOnAuthenticationFailure=false
 
-# cas.authn.radius.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.radius.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.radius.passwordEncoder.characterEncoding=
 # cas.authn.radius.passwordEncoder.encodingAlgorithm=
 # cas.authn.radius.passwordEncoder.secret=
@@ -815,7 +828,7 @@ To learn more about this topic, [please review this guide](Whitelist-Authenticat
 # cas.authn.file.filename=file:///path/to/users/file
 # cas.authn.file.name=
 
-# cas.authn.file.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.file.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.file.passwordEncoder.characterEncoding=
 # cas.authn.file.passwordEncoder.encodingAlgorithm=
 # cas.authn.file.passwordEncoder.secret=
@@ -834,7 +847,7 @@ To learn more about this topic, [please review this guide](Blacklist-Authenticat
 # cas.authn.reject.users=user1,user2
 # cas.authn.reject.name=
 
-# cas.authn.reject.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.reject.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.reject.passwordEncoder.characterEncoding=
 # cas.authn.reject.passwordEncoder.encodingAlgorithm=
 # cas.authn.reject.passwordEncoder.secret=
@@ -851,7 +864,8 @@ To learn more about this topic, [please review this guide](Database-Authenticati
 
 ### Query
 
-Authenticates a user by comparing the user password (which can be encoded with a password encoder) against the password on record determined by a configurable database query.
+Authenticates a user by comparing the user password (which can be encoded with a password encoder)
+against the password on record determined by a configurable database query.
 
 ```properties
 # cas.authn.jdbc.query[0].sql=SELECT password FROM table WHERE name=?
@@ -873,8 +887,9 @@ Authenticates a user by comparing the user password (which can be encoded with a
 # cas.authn.jdbc.query[0].idleTimeout=5000
 # cas.authn.jdbc.query[0].credentialCriteria=
 # cas.authn.jdbc.query[0].name=
+# cas.authn.jdbc.query[0].order=0
 
-# cas.authn.jdbc.query[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.jdbc.query[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.jdbc.query[0].passwordEncoder.characterEncoding=
 # cas.authn.jdbc.query[0].passwordEncoder.encodingAlgorithm=
 # cas.authn.jdbc.query[0].passwordEncoder.secret=
@@ -911,8 +926,9 @@ Searches for a user record by querying against a username and password; the user
 # cas.authn.jdbc.search[0].idleTimeout=5000
 # cas.authn.jdbc.search[0].credentialCriteria=
 # cas.authn.jdbc.search[0].name=
+# cas.authn.jdbc.search[0].order=0
 
-# cas.authn.jdbc.search[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.jdbc.search[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.jdbc.search[0].passwordEncoder.characterEncoding=
 # cas.authn.jdbc.search[0].passwordEncoder.encodingAlgorithm=
 # cas.authn.jdbc.search[0].passwordEncoder.secret=
@@ -946,8 +962,9 @@ Authenticates a user by attempting to create a database connection using the use
 # cas.authn.jdbc.bind[0].idleTimeout=5000
 # cas.authn.jdbc.bind[0].credentialCriteria=
 # cas.authn.jdbc.bind[0].name=
+# cas.authn.jdbc.bind[0].order=0
 
-# cas.authn.jdbc.bind[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.jdbc.bind[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.jdbc.bind[0].passwordEncoder.characterEncoding=
 # cas.authn.jdbc.bind[0].passwordEncoder.encodingAlgorithm=
 # cas.authn.jdbc.bind[0].passwordEncoder.secret=
@@ -994,8 +1011,9 @@ is converted to hex before comparing it to the database value.
 # cas.authn.jdbc.encode[0].idleTimeout=5000
 # cas.authn.jdbc.encode[0].credentialCriteria=
 # cas.authn.jdbc.encode[0].name=
+# cas.authn.jdbc.encode[0].order=0
 
-# cas.authn.jdbc.encode[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.jdbc.encode[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.jdbc.encode[0].passwordEncoder.characterEncoding=
 # cas.authn.jdbc.encode[0].passwordEncoder.encodingAlgorithm=
 # cas.authn.jdbc.encode[0].passwordEncoder.secret=
@@ -1022,7 +1040,7 @@ To learn more about this topic, [please review this guide](MongoDb-Authenticatio
 # cas.authn.mongo.principalTransformation.caseConversion=NONE|UPPERCASE|LOWERCASE
 # cas.authn.mongo.principalTransformation.prefix=
 
-# cas.authn.mongo.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.mongo.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.mongo.passwordEncoder.characterEncoding=
 # cas.authn.mongo.passwordEncoder.encodingAlgorithm=
 # cas.authn.mongo.passwordEncoder.secret=
@@ -1138,8 +1156,9 @@ If multiple URLs are provided as the ldapURL this describes how each URL will be
 # cas.authn.ldap[0].allowMultipleDns=false
 
 # cas.authn.ldap[0].name=
+# cas.authn.ldap[0].order=0
 
-# cas.authn.ldap[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.ldap[0].passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.ldap[0].passwordEncoder.characterEncoding=
 # cas.authn.ldap[0].passwordEncoder.encodingAlgorithm=
 # cas.authn.ldap[0].passwordEncoder.secret=
@@ -1157,6 +1176,7 @@ If multiple URLs are provided as the ldapURL this describes how each URL will be
 # cas.authn.ldap[0].validator.attributeValues=top
 # cas.authn.ldap[0].validator.dn=
 
+# cas.authn.ldap[0].passwordPolicy.type=GENERIC|AD|FreeIPA|EDirectory
 # cas.authn.ldap[0].passwordPolicy.enabled=true
 # cas.authn.ldap[0].passwordPolicy.policyAttributes.accountLocked=javax.security.auth.login.AccountLockedException
 # cas.authn.ldap[0].passwordPolicy.loginFailures=5
@@ -1177,7 +1197,7 @@ To learn more about this topic, [please review this guide](Rest-Authentication.h
 # cas.authn.rest.uri=https://...
 # cas.authn.rest.name=
 
-# cas.authn.rest.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.rest.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.rest.passwordEncoder.characterEncoding=
 # cas.authn.rest.passwordEncoder.encodingAlgorithm=
 # cas.authn.rest.passwordEncoder.secret=
@@ -1287,7 +1307,7 @@ To learn more about this topic, [please review this guide](JAAS-Authentication.h
 # cas.authn.jaas.kerberosRealmSystemProperty=
 # cas.authn.jaas.name=
 
-# cas.authn.jaas.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.jaas.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.jaas.passwordEncoder.characterEncoding=
 # cas.authn.jaas.passwordEncoder.encodingAlgorithm=
 # cas.authn.jaas.passwordEncoder.secret=
@@ -1373,8 +1393,7 @@ To learn more about this topic, [please review this guide](X509-Authentication.h
 
 ### CRL Fetching / Revocation
 
-CAS provides a flexible policy engine for certificate revocation checking. This facility arose due to lack of
-configurability in the revocation machinery built into the JSSE.
+CAS provides a flexible policy engine for certificate revocation checking. This facility arose due to lack of configurability in the revocation machinery built into the JSSE.
 
 Available policies cover the following events:
 
@@ -1434,6 +1453,7 @@ To fetch CRLs, the following options are available:
 # cas.authn.x509.serialNumberPrefix=SERIALNUMBER=
 # cas.authn.x509.refreshIntervalSeconds=3600
 # cas.authn.x509.maxPathLengthAllowUnspecified=false
+# cas.authn.x509.certificateAttribute=certificateRevocationList
 
 # cas.authn.x509.ldap.ldapUrl=ldaps://ldap1.example.edu ldaps://ldap2.example.edu
 # cas.authn.x509.ldap.connectionStrategy=
@@ -1483,7 +1503,7 @@ To learn more about this topic, [please review this guide](Shiro-Authentication.
 # cas.authn.shiro.config.location=classpath:shiro.ini
 # cas.authn.shiro.name=
 
-# cas.authn.shiro.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT
+# cas.authn.shiro.passwordEncoder.type=NONE|DEFAULT|STANDARD|BCRYPT|com.example.CustomPasswordEncoder
 # cas.authn.shiro.passwordEncoder.characterEncoding=
 # cas.authn.shiro.passwordEncoder.encodingAlgorithm=
 # cas.authn.shiro.passwordEncoder.secret=
@@ -1545,6 +1565,9 @@ To learn more about this topic, [please review this guide](Configuring-Multifact
 
 ```properties
 # cas.authn.mfa.globalProviderId=mfa-duo
+
+# cas.authn.mfa.globalAuthenticationAttributeNameTriggers=memberOf,eduPersonPrimaryAffiliation
+# cas.authn.mfa.globalAuthenticationAttributeValueRegex=faculty|staff
 
 # cas.authn.mfa.globalPrincipalAttributeNameTriggers=memberOf,eduPersonPrimaryAffiliation
 # cas.authn.mfa.globalPrincipalAttributeValueRegex=faculty|staff
@@ -1639,6 +1662,10 @@ To learn more about this topic, [please review this guide](GoogleAuthenticator-A
 # cas.authn.mfa.gauth.trustedDeviceEnabled=true
 # cas.authn.mfa.gauth.name=
 
+# cas.authn.mfa.gauth.cleaner.enabled=true
+# cas.authn.mfa.gauth.cleaner.startDelay=20000
+# cas.authn.mfa.gauth.cleaner.repeatInterval=60000
+
 # cas.authn.mfa.gauth.bypass.principalAttributeName=bypass|skip
 # cas.authn.mfa.gauth.bypass.principalAttributeValue=true|enabled.+
 # cas.authn.mfa.gauth.bypass.authenticationAttributeName=bypass|skip
@@ -1648,12 +1675,19 @@ To learn more about this topic, [please review this guide](GoogleAuthenticator-A
 # cas.authn.mfa.gauth.bypass.credentialClassType=UsernamePassword.+
 ```
 
+#### Google Authenticator JSON
+
+```properties
+# cas.authn.mfa.gauth.json.config.location=file:/somewhere.json
+```
+
 #### Google Authenticator MongoDb
 
 ```properties
 # cas.authn.mfa.gauth.mongodb.clientUri=
 # cas.authn.mfa.gauth.mongodb.dropCollection=false
 # cas.authn.mfa.gauth.mongodb.collection=MongoDbGoogleAuthenticatorRepository
+# cas.authn.mfa.gauth.mongodb.tokenCollection=MongoDbGoogleAuthenticatorTokenRepository
 ```
 
 #### Google Authenticator JPA
@@ -1758,6 +1792,28 @@ To learn more about this topic, [please review this guide](DuoSecurity-Authentic
 # cas.authn.mfa.duo[0].bypass.authenticationHandlerName=AcceptUsers.+
 # cas.authn.mfa.duo[0].bypass.authenticationMethodName=LdapAuthentication.+
 # cas.authn.mfa.duo[0].bypass.credentialClassType=UsernamePassword.+
+```
+
+### Microsoft Azure
+
+To learn more about this topic, [please review this guide](MicrosoftAzure-Authentication.html).
+
+```properties
+# cas.authn.mfa.azure.phoneAttribute=phone
+# cas.authn.mfa.azure.configDir=/etc/cas/azure
+# cas.authn.mfa.azure.privateKeyPassword=
+# cas.authn.mfa.azure.mode=POUND|PIN
+# cas.authn.mfa.azure.rank=0
+# cas.authn.mfa.azure.name=
+# cas.authn.mfa.azure.allowInternationalCalls=false
+
+# cas.authn.mfa.azure.bypass.principalAttributeName=bypass|skip
+# cas.authn.mfa.azure.bypass.principalAttributeValue=true|enabled.+
+# cas.authn.mfa.azure.bypass.authenticationAttributeName=bypass|skip
+# cas.authn.mfa.azure.bypass.authenticationAttributeValue=allowed.+|enabled.+
+# cas.authn.mfa.azure.bypass.authenticationHandlerName=AcceptUsers.+
+# cas.authn.mfa.azure.bypass.authenticationMethodName=LdapAuthentication.+
+# cas.authn.mfa.azure.bypass.credentialClassType=UsernamePassword.+
 ```
 
 ### Authy
@@ -1921,6 +1977,35 @@ To learn more about this topic, [please review this guide](../integration/Config
 # cas.samlSP.zoom.description=Zoom Integration
 # cas.samlSP.zoom.attributes=mail,sn,givenName
 # cas.samlSP.zoom.nameIdAttribute=mail
+```
+
+### Evernote
+
+```properties
+# cas.samlSP.evernote.metadata=/etc/cas/saml/evernote.xml
+# cas.samlSP.evernote.name=Evernote
+# cas.samlSP.evernote.description=Evernote Integration
+# cas.samlSP.evernote.nameIdAttribute=mail
+# cas.samlSP.evernote.nameIdFormat=emailAddress
+```
+
+### Tableau
+
+```properties
+# cas.samlSP.tableau.metadata=/etc/cas/saml/tableau.xml
+# cas.samlSP.tableau.name=Tableau
+# cas.samlSP.tableau.description=Tableau Integration
+# cas.samlSP.tableau.attributes=username
+```
+
+### Asana
+
+```properties
+# cas.samlSP.asana.metadata=/etc/cas/saml/asana.xml
+# cas.samlSP.asana.name=Asana
+# cas.samlSP.asana.description=Asana Integration
+# cas.samlSP.asana.nameIdAttribute=mail
+# cas.samlSP.asana.nameIdFormat=emailAddress
 ```
 
 ### Box
@@ -3299,7 +3384,7 @@ To learn more about this topic, [please review this guide](Password-Policy-Enfor
 ### LDAP
 
 ```properties
-# cas.authn.pm.ldap.type=GENERIC|AD
+# cas.authn.pm.ldap.type=GENERIC|AD|FreeIPA|EDirectory
 # cas.authn.pm.ldap.ldapUrl=ldaps://ldap1.example.edu ldaps://ldap2.example.edu
 # cas.authn.pm.ldap.connectionStrategy=
 # cas.authn.pm.ldap.useSsl=true

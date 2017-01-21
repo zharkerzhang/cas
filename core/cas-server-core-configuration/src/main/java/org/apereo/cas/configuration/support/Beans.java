@@ -17,6 +17,7 @@ import org.apereo.cas.configuration.model.core.authentication.PasswordEncoderPro
 import org.apereo.cas.configuration.model.core.authentication.PrincipalAttributesProperties;
 import org.apereo.cas.configuration.model.core.authentication.PrincipalTransformationProperties;
 import org.apereo.cas.configuration.model.core.util.CryptographyProperties;
+import org.apereo.cas.configuration.model.support.ConnectionPoolingProperties;
 import org.apereo.cas.configuration.model.support.jpa.AbstractJpaProperties;
 import org.apereo.cas.configuration.model.support.jpa.DatabaseProperties;
 import org.apereo.cas.configuration.model.support.jpa.JpaConfigDataHolder;
@@ -25,6 +26,9 @@ import org.apereo.cas.configuration.model.support.ldap.LdapAuthenticationPropert
 import org.apereo.cas.configuration.model.support.mongo.AbstractMongoInstanceProperties;
 import org.apereo.cas.util.cipher.DefaultTicketCipherExecutor;
 import org.apereo.cas.util.cipher.NoOpCipherExecutor;
+import org.apereo.cas.util.crypto.DefaultPasswordEncoder;
+import org.apereo.cas.util.transforms.ConvertCasePrincipalNameTransformer;
+import org.apereo.cas.util.transforms.PrefixSuffixPrincipalNameTransformer;
 import org.apereo.services.persondir.IPersonAttributeDao;
 import org.apereo.services.persondir.support.NamedStubPersonAttributeDao;
 import org.ldaptive.ActivePassiveConnectionStrategy;
@@ -222,16 +226,41 @@ public final class Beans {
      * @return the password encoder
      */
     public static PasswordEncoder newPasswordEncoder(final PasswordEncoderProperties properties) {
-        switch (properties.getType()) {
+        final String type = properties.getType();
+        if (StringUtils.isBlank(type)) {
+            LOGGER.debug("No password encoder type is defined, and so none shall be created");
+            return NoOpPasswordEncoder.getInstance();
+        }
+
+        if (type.contains(".")) {
+            try {
+                LOGGER.debug("Configuration indicates use of a custom password encoder {}", type);
+                final Class<PasswordEncoder> clazz = (Class<PasswordEncoder>) Class.forName(type);
+                return clazz.newInstance();
+            } catch (final Exception e) {
+                LOGGER.error("Falling back to a no-op password encoder as CAS has failed to create "
+                        + "an instance of the custom password encoder class " + type, e);
+                return NoOpPasswordEncoder.getInstance();
+            }
+        }
+
+        final PasswordEncoderProperties.PasswordEncoderTypes encoderType = PasswordEncoderProperties.PasswordEncoderTypes.valueOf(type);
+        switch (encoderType) {
             case DEFAULT:
+                LOGGER.debug("Creating default password encoder with encoding alg {} and character encoding {}",
+                        properties.getEncodingAlgorithm(), properties.getCharacterEncoding());
                 return new DefaultPasswordEncoder(properties.getEncodingAlgorithm(), properties.getCharacterEncoding());
             case STANDARD:
+                LOGGER.debug("Creating standard password encoder with the secret defined in the configuration");
                 return new StandardPasswordEncoder(properties.getSecret());
             case BCRYPT:
+                LOGGER.debug("Creating BCRYPT password encoder given the strength {} and secret in the configuration",
+                        properties.getStrength());
                 return new BCryptPasswordEncoder(properties.getStrength(),
                         new SecureRandom(properties.getSecret().getBytes(StandardCharsets.UTF_8)));
             case NONE:
             default:
+                LOGGER.debug("No password encoder shall be created");
                 return NoOpPasswordEncoder.getInstance();
         }
     }
@@ -274,15 +303,17 @@ public final class Beans {
     /**
      * New dn resolver entry resolver.
      *
-     * @param l the ldap settings
+     * @param l       the ldap settings
+     * @param factory the factory
      * @return the entry resolver
      */
-    public static EntryResolver newSearchEntryResolver(final LdapAuthenticationProperties l) {
+    public static EntryResolver newSearchEntryResolver(final LdapAuthenticationProperties l,
+                                                       final PooledConnectionFactory factory) {
         final PooledSearchEntryResolver entryResolver = new PooledSearchEntryResolver();
         entryResolver.setBaseDn(l.getBaseDn());
         entryResolver.setUserFilter(l.getUserFilter());
         entryResolver.setSubtreeSearch(l.isSubtreeSearch());
-        entryResolver.setConnectionFactory(Beans.newPooledConnectionFactory(l));
+        entryResolver.setConnectionFactory(factory);
         return entryResolver;
     }
 
@@ -294,6 +325,7 @@ public final class Beans {
      * @return the connection config
      */
     public static ConnectionConfig newConnectionConfig(final AbstractLdapProperties l) {
+        LOGGER.debug("Creating LDAP connection configuration for {}", l.getLdapUrl());
         final ConnectionConfig cc = new ConnectionConfig();
         cc.setLdapUrl(l.getLdapUrl());
         cc.setUseSSL(l.isUseSsl());
@@ -379,6 +411,7 @@ public final class Beans {
      * @return the pool config
      */
     public static PoolConfig newPoolConfig(final AbstractLdapProperties l) {
+        LOGGER.debug("Creating LDAP connection pool configuration for {}", l.getLdapUrl());
         final PoolConfig pc = new PoolConfig();
         pc.setMinPoolSize(l.getMinPoolSize());
         pc.setMaxPoolSize(l.getMaxPoolSize());
@@ -395,6 +428,7 @@ public final class Beans {
      * @return the connection factory
      */
     public static DefaultConnectionFactory newConnectionFactory(final AbstractLdapProperties l) {
+        LOGGER.debug("Creating LDAP connection factory for {}", l.getLdapUrl());
         final ConnectionConfig cc = newConnectionConfig(l);
         final DefaultConnectionFactory bindCf = new DefaultConnectionFactory(cc);
         if (l.getProviderClass() != null) {

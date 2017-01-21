@@ -16,7 +16,7 @@ import java.util.Map;
  * of attributes.
  * </p>
  * <p>
- * An Authentication object must be serializable to permit persistance and
+ * An Authentication object must be serializable to permit persistence and
  * clustering.
  * </p>
  * <p>
@@ -32,6 +32,19 @@ import java.util.Map;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY)
 public interface Authentication extends Serializable {
 
+    /**
+     * Internal authentication attribute that captures whether credentials were directly provided
+     * and renewed at the time of authentication creation.
+     */
+    String AUTHENTICATION_ATTRIBUTE_CREDENTIAL_PROVIDED = "renewedCredentialsProvided";
+
+    /**
+     * Determines whether credentials where directly provided as part of this authentication transaction
+     * at the time it was established.
+     * @return true/false
+     */
+    boolean isCredentialProvided();
+    
     /**
      * Method to obtain the Principal.
      *

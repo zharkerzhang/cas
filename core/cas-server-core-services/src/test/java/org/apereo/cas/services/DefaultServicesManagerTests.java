@@ -33,7 +33,7 @@ public class DefaultServicesManagerTests {
         r.setEvaluationOrder(1000);
 
         list.add(r);
-        dao = new InMemoryServiceRegistryDao(list);
+        dao = new InMemoryServiceRegistry(list);
         this.defaultServicesManager = new DefaultServicesManager(dao);
         this.defaultServicesManager.load();
     }
@@ -113,7 +113,7 @@ public class DefaultServicesManagerTests {
         this.defaultServicesManager.save(r);
 
         assertTrue(this.defaultServicesManager.matchesExistingService(service));
-        Assert.assertEquals(r, this.defaultServicesManager.findServiceBy(service));
+        assertEquals(r, this.defaultServicesManager.findServiceBy(service));
         assertNull(this.defaultServicesManager.findServiceBy(service2));
     }
 
@@ -207,7 +207,7 @@ public class DefaultServicesManagerTests {
 
         defaultServicesManager.save(service);
 
-        final Collection<RegisteredService> serviceRetrieved = defaultServicesManager.findServiceBy(s -> s instanceof RegexRegisteredService);
+        final Collection<RegisteredService> serviceRetrieved = defaultServicesManager.findServiceBy(RegexRegisteredService.class::isInstance);
 
         assertEquals(description, serviceRetrieved.toArray(new RegisteredService[]{})[0].getDescription());
     }
@@ -228,7 +228,7 @@ public class DefaultServicesManagerTests {
         dao.save(service);
         defaultServicesManager.load();
 
-        final Collection<RegisteredService> serviceRetrieved = defaultServicesManager.findServiceBy(s -> s instanceof RegexRegisteredService);
+        final Collection<RegisteredService> serviceRetrieved = defaultServicesManager.findServiceBy(RegexRegisteredService.class::isInstance);
 
         assertEquals(description, serviceRetrieved.toArray(new RegisteredService[]{})[0].getDescription());
     }

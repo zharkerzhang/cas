@@ -3,6 +3,7 @@ package org.apereo.cas.configuration.model.support.mfa;
 import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.configuration.model.support.jpa.AbstractJpaProperties;
 import org.apereo.cas.configuration.model.support.mongo.AbstractMongoClientProperties;
+import org.apereo.cas.configuration.support.AbstractConfigProperties;
 import org.apereo.cas.configuration.support.Beans;
 
 import java.io.Serializable;
@@ -28,17 +29,29 @@ public class MultifactorAuthenticationProperties implements Serializable {
     private String globalPrincipalAttributeNameTriggers;
     private String globalPrincipalAttributeValueRegex;
 
+    private String globalAuthenticationAttributeNameTriggers;
+    private String globalAuthenticationAttributeValueRegex;
+    
     private String contentType = "application/cas";
     private String globalProviderId;
 
     private String grouperGroupField;
 
+    private Azure azure = new Azure();
     private Trusted trusted = new Trusted();
     private YubiKey yubikey = new YubiKey();
     private Radius radius = new Radius();
     private GAuth gauth = new GAuth();
     private List<Duo> duo = new ArrayList<>();
     private Authy authy = new Authy();
+
+    public Azure getAzure() {
+        return azure;
+    }
+
+    public void setAzure(final Azure azure) {
+        this.azure = azure;
+    }
 
     public Trusted getTrusted() {
         return trusted;
@@ -70,6 +83,22 @@ public class MultifactorAuthenticationProperties implements Serializable {
 
     public void setRequestParameter(final String requestParameter) {
         this.requestParameter = requestParameter;
+    }
+
+    public String getGlobalAuthenticationAttributeNameTriggers() {
+        return globalAuthenticationAttributeNameTriggers;
+    }
+
+    public void setGlobalAuthenticationAttributeNameTriggers(final String globalAuthenticationAttributeNameTriggers) {
+        this.globalAuthenticationAttributeNameTriggers = globalAuthenticationAttributeNameTriggers;
+    }
+
+    public String getGlobalAuthenticationAttributeValueRegex() {
+        return globalAuthenticationAttributeValueRegex;
+    }
+
+    public void setGlobalAuthenticationAttributeValueRegex(final String globalAuthenticationAttributeValueRegex) {
+        this.globalAuthenticationAttributeValueRegex = globalAuthenticationAttributeValueRegex;
     }
 
     public String getGlobalPrincipalAttributeValueRegex() {
@@ -785,6 +814,74 @@ public class MultifactorAuthenticationProperties implements Serializable {
         }
     }
 
+    public static class Azure extends BaseProvider {
+        private static final long serialVersionUID = 6726032660671158922L;
+
+        /**
+         * The enum Authentication modes.
+         */
+        public enum AuthenticationModes {
+            /**
+             * Ask the user to only press the pound sign.
+             */
+            POUND,
+            /**
+             * Ask the user to enter pin code shown on the screen.
+             */
+            PIN
+        }
+        
+        private String phoneAttributeName = "phone";
+        private String configDir;
+        private String privateKeyPassword;
+        private AuthenticationModes mode = AuthenticationModes.POUND;
+        private boolean allowInternationalCalls;
+
+        public Azure() {
+            setId("mfa-azure");
+        }
+
+        public String getPhoneAttributeName() {
+            return phoneAttributeName;
+        }
+
+        public void setPhoneAttributeName(final String phoneAttributeName) {
+            this.phoneAttributeName = phoneAttributeName;
+        }
+
+        public AuthenticationModes getMode() {
+            return mode;
+        }
+
+        public void setMode(final AuthenticationModes mode) {
+            this.mode = mode;
+        }
+        
+        public boolean isAllowInternationalCalls() {
+            return allowInternationalCalls;
+        }
+
+        public void setAllowInternationalCalls(final boolean allowInternationalCalls) {
+            this.allowInternationalCalls = allowInternationalCalls;
+        }
+
+        public String getConfigDir() {
+            return configDir;
+        }
+
+        public void setConfigDir(final String configDir) {
+            this.configDir = configDir;
+        }
+
+        public String getPrivateKeyPassword() {
+            return privateKeyPassword;
+        }
+
+        public void setPrivateKeyPassword(final String privateKeyPassword) {
+            this.privateKeyPassword = privateKeyPassword;
+        }
+    }
+    
     public static class GAuth extends BaseProvider {
         private static final long serialVersionUID = -7401748853833491119L;
         private String issuer = "CASIssuer";
@@ -795,11 +892,28 @@ public class MultifactorAuthenticationProperties implements Serializable {
         private int windowSize = 3;
 
         private Mongodb mongodb = new Mongodb();
-
         private Jpa jpa = new Jpa();
-
+        private Json json = new Json();
+        private Cleaner cleaner = new Cleaner();
+        
         public GAuth() {
             setId("mfa-gauth");
+        }
+
+        public Cleaner getCleaner() {
+            return cleaner;
+        }
+
+        public void setCleaner(final Cleaner cleaner) {
+            this.cleaner = cleaner;
+        }
+
+        public Json getJson() {
+            return json;
+        }
+
+        public void setJson(final Json json) {
+            this.json = json;
         }
 
         public Mongodb getMongodb() {
@@ -858,9 +972,23 @@ public class MultifactorAuthenticationProperties implements Serializable {
             this.label = label;
         }
 
+        public static class Json extends AbstractConfigProperties {
+        }
+        
         public static class Mongodb extends AbstractMongoClientProperties {
+            private String tokenCollection;
+            
             public Mongodb() {
                 setCollection("MongoDbGoogleAuthenticatorRepository");
+                setTokenCollection("MongoDbGoogleAuthenticatorTokenRepository");
+            }
+
+            public String getTokenCollection() {
+                return tokenCollection;
+            }
+
+            public void setTokenCollection(final String tokenCollection) {
+                this.tokenCollection = tokenCollection;
             }
         }
 
@@ -879,6 +1007,36 @@ public class MultifactorAuthenticationProperties implements Serializable {
                 public Database() {
                     super.setUrl("jdbc:hsqldb:mem:cas-gauth");
                 }
+            }
+        }
+
+        public static class Cleaner {
+            private boolean enabled = true;
+            private String startDelay = "PT1M";
+            private String repeatInterval = "PT1M";
+
+            public boolean isEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(final boolean enabled) {
+                this.enabled = enabled;
+            }
+
+            public String getStartDelay() {
+                return startDelay;
+            }
+
+            public void setStartDelay(final String startDelay) {
+                this.startDelay = startDelay;
+            }
+
+            public String getRepeatInterval() {
+                return repeatInterval;
+            }
+
+            public void setRepeatInterval(final String repeatInterval) {
+                this.repeatInterval = repeatInterval;
             }
         }
     }

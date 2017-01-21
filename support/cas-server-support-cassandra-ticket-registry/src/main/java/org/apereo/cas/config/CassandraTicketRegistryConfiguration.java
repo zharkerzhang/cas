@@ -27,7 +27,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @Configuration("cassandraTicketRegistryConfiguration")
 @EnableScheduling
-@EnableConfigurationProperties({CasConfigurationProperties.class})
+@EnableConfigurationProperties(CasConfigurationProperties.class)
 public class CassandraTicketRegistryConfiguration {
 
     @Autowired

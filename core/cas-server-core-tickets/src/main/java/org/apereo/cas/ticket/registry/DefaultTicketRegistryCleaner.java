@@ -24,6 +24,7 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultTicketRegistryCleaner.class);
 
+    /** Logout manager instance. */
     protected final LogoutManager logoutManager;
     
     private final TicketRegistry ticketRegistry;
@@ -63,7 +64,7 @@ public class DefaultTicketRegistryCleaner implements TicketRegistryCleaner {
                 LOGGER.info("Could not obtain lock. Aborting cleanup. The ticket registry may not support self-service maintenance.");
                 return;
             }
-            LOGGER.debug("Acquired lock.  Proceeding with cleanup.");
+            LOGGER.debug("Acquired lock. Proceeding with cleanup.");
             cleanInternal();
         } catch (final Exception e) {
             LOGGER.error(e.getMessage(), e);

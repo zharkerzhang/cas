@@ -30,55 +30,41 @@ import java.security.GeneralSecurityException;
 public class FileAuthenticationHandler extends AbstractUsernamePasswordAuthenticationHandler {
 
     /** The default separator in the file. */
-    private static final String DEFAULT_SEPARATOR = "::";
+    public static final String DEFAULT_SEPARATOR = "::";
 
     /** The separator to use. */
-    
-    private String separator = DEFAULT_SEPARATOR;
+    private final String separator;
 
     /** The filename to read the list of usernames from. */
-    private Resource fileName;
+    private final Resource fileName;
 
+    public FileAuthenticationHandler(final Resource fileName, final String separator) {
+        this.fileName = fileName;
+        this.separator = separator;
+    }
 
     @Override
-    protected HandlerResult authenticateUsernamePasswordInternal(final UsernamePasswordCredential credential)
+    protected HandlerResult authenticateUsernamePasswordInternal(final UsernamePasswordCredential transformedCredential, 
+                                                                 final String originalPassword)
             throws GeneralSecurityException, PreventedException {
-
         try {
             if (this.fileName == null) {
                 throw new FileNotFoundException("Filename does not exist");
             }
-
-            final String username = credential.getUsername();
+            final String username = transformedCredential.getUsername();
             final String passwordOnRecord = getPasswordOnRecord(username);
             if (StringUtils.isBlank(passwordOnRecord)) {
                 throw new AccountNotFoundException(username + " not found in backing file.");
             }
-            final String password = credential.getPassword();
-            if (StringUtils.equals(password, passwordOnRecord)) {
-                return createHandlerResult(credential, this.principalFactory.createPrincipal(username), null);
+            if (matches(originalPassword, passwordOnRecord)) {
+                return createHandlerResult(transformedCredential, this.principalFactory.createPrincipal(username), null);
             }
         } catch (final IOException e) {
             throw new PreventedException("IO error reading backing file", e);
         }
         throw new FailedLoginException();
     }
-
-    /**
-     * @param fileName The fileName to set.
-     */
-
-    public void setFileName(final Resource fileName) {
-        this.fileName = fileName;
-    }
-
-    /**
-     * @param separator The separator to set.
-     */
-    public void setSeparator(final String separator) {
-        this.separator = separator;
-    }
-
+    
     /**
      * Gets the password on record.
      *

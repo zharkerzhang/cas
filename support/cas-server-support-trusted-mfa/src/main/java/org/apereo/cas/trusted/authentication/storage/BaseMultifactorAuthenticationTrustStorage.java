@@ -22,7 +22,7 @@ import java.util.Set;
  * @since 5.0.0
  */
 @EnableTransactionManagement(proxyTargetClass = true)
-@Transactional(readOnly = false, transactionManager = "transactionManagerMfaAuthnTrust")
+@Transactional(transactionManager = "transactionManagerMfaAuthnTrust")
 public abstract class BaseMultifactorAuthenticationTrustStorage implements MultifactorAuthenticationTrustStorage {
     protected final transient Logger logger = LoggerFactory.getLogger(this.getClass());
     
@@ -49,10 +49,7 @@ public abstract class BaseMultifactorAuthenticationTrustStorage implements Multi
             if (StringUtils.isBlank(decodedKey)) {
                 return true;
             }
-            if (!decodedKey.equals(currentKey)) {
-                return true;
-            }
-            return false;
+            return !decodedKey.equals(currentKey);
         });
         return res;
     }

@@ -46,11 +46,9 @@ import org.jasig.cas.client.util.URIBuilder;
 import org.pac4j.cas.client.CasClient;
 import org.pac4j.cas.config.CasConfiguration;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.http.CallbackUrlResolver;
-import org.pac4j.core.redirect.RedirectAction;
 import org.pac4j.http.client.direct.DirectBasicAuthClient;
 import org.pac4j.http.client.direct.DirectFormClient;
 import org.pac4j.springframework.web.CallbackController;
@@ -72,7 +70,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apereo.cas.support.oauth.OAuthConstants.BASE_OAUTH20_URL;
+import static org.apereo.cas.support.oauth.OAuthConstants.*;
 
 /**
  * This this {@link CasOAuthConfiguration}.
@@ -120,13 +118,8 @@ public class CasOAuthConfiguration extends WebMvcConfigurerAdapter {
     @Bean
     public Config oauthSecConfig() {
         final CasConfiguration cfg = new CasConfiguration(casProperties.getServer().getLoginUrl());
-        final CasClient oauthCasClient = new CasClient(cfg) {
-            @Override
-            protected RedirectAction retrieveRedirectAction(final WebContext context) {
-                return oauthCasClientRedirectActionBuilder().build(this, context);
-            }
-        };
-
+        final CasClient oauthCasClient = new CasClient(cfg);
+        oauthCasClient.setRedirectActionBuilder(webContext -> oauthCasClientRedirectActionBuilder().build(oauthCasClient, webContext));
         oauthCasClient.setName(Authenticators.CAS_OAUTH_CLIENT);
         oauthCasClient.setCallbackUrlResolver(buildOAuthCasCallbackUrlResolver());
 
@@ -142,15 +135,13 @@ public class CasOAuthConfiguration extends WebMvcConfigurerAdapter {
         final DirectFormClient userFormClient = new DirectFormClient(oAuthUserAuthenticator());
         userFormClient.setName(Authenticators.CAS_OAUTH_CLIENT_USER_FORM);
 
-        final String callbackUrl = casProperties.getServer().getPrefix().concat(OAuthConstants.BASE_OAUTH20_URL
-                + '/' + OAuthConstants.CALLBACK_AUTHORIZE_URL);
+        final String callbackUrl = casProperties.getServer().getPrefix().concat(BASE_OAUTH20_URL + '/' + OAuthConstants.CALLBACK_AUTHORIZE_URL);
         return new Config(callbackUrl, oauthCasClient, basicAuthClient, directFormClient, userFormClient);
     }
 
     private CallbackUrlResolver buildOAuthCasCallbackUrlResolver() {
         return (url, context) -> {
-            final String callbackUrl = casProperties.getServer().getPrefix().concat(OAuthConstants.BASE_OAUTH20_URL
-                    + '/' + OAuthConstants.CALLBACK_AUTHORIZE_URL);
+            final String callbackUrl = casProperties.getServer().getPrefix().concat(BASE_OAUTH20_URL + '/' + OAuthConstants.CALLBACK_AUTHORIZE_URL);
             if (url.startsWith(callbackUrl)) {
                 final URIBuilder builder = new URIBuilder(url);
                 final URIBuilder builderContext = new URIBuilder(context.getFullRequestURL());
@@ -158,22 +149,16 @@ public class CasOAuthConfiguration extends WebMvcConfigurerAdapter {
                         .stream().filter(p -> p.getName().equals(OAuthConstants.CLIENT_ID))
                         .findFirst();
 
-                if (parameter.isPresent()) {
-                    builder.addParameter(parameter.get().getName(), parameter.get().getValue());
-                }
+                parameter.ifPresent(basicNameValuePair -> builder.addParameter(basicNameValuePair.getName(), basicNameValuePair.getValue()));
                 parameter = builderContext.getQueryParams()
                         .stream().filter(p -> p.getName().equals(OAuthConstants.REDIRECT_URI))
                         .findFirst();
-                if (parameter.isPresent()) {
-                    builder.addParameter(parameter.get().getName(), parameter.get().getValue());
-                }
+                parameter.ifPresent(basicNameValuePair -> builder.addParameter(basicNameValuePair.getName(), basicNameValuePair.getValue()));
 
                 parameter = builderContext.getQueryParams()
                         .stream().filter(p -> p.getName().equals(OAuthConstants.ACR_VALUES))
                         .findFirst();
-                if (parameter.isPresent()) {
-                    builder.addParameter(parameter.get().getName(), parameter.get().getValue());
-                }
+                parameter.ifPresent(basicNameValuePair -> builder.addParameter(basicNameValuePair.getName(), basicNameValuePair.getValue()));
                 return builder.build().toString();
             }
             return url;
@@ -203,8 +188,8 @@ public class CasOAuthConfiguration extends WebMvcConfigurerAdapter {
     @Bean
     public HandlerInterceptorAdapter requiresAuthenticationAccessTokenInterceptor() {
         final String clients = Stream.of(Authenticators.CAS_OAUTH_CLIENT_BASIC_AUTHN,
-                        Authenticators.CAS_OAUTH_CLIENT_DIRECT_FORM,
-                        Authenticators.CAS_OAUTH_CLIENT_USER_FORM).collect(Collectors.joining(","));
+                Authenticators.CAS_OAUTH_CLIENT_DIRECT_FORM,
+                Authenticators.CAS_OAUTH_CLIENT_USER_FORM).collect(Collectors.joining(","));
         return new SecurityInterceptor(oauthSecConfig(), clients);
     }
 
@@ -323,6 +308,7 @@ public class CasOAuthConfiguration extends WebMvcConfigurerAdapter {
         );
     }
 
+    @ConditionalOnMissingBean(name = "oauthPrincipalFactory")
     @Bean
     public PrincipalFactory oauthPrincipalFactory() {
         return new DefaultPrincipalFactory();

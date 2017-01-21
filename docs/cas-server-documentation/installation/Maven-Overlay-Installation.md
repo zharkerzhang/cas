@@ -9,9 +9,9 @@ CAS installation is a fundamentally source-oriented process, and we recommend a
 WAR overlay (1) project to organize
 customizations such as component configuration and UI design.
 The output of a WAR overlay build is a `cas.war` file that can be deployed to a servlet container like
-[Tomcat](http://tomcat.apache.org/whichversion.html).
+[Apache Tomcat](http://tomcat.apache.org/whichversion.html).
 
-## What is War Overlay?
+## What is a WAR Overlay?
 
 Overlays are a strategy to combat repetitive code and/or resources. Rather than downloading the CAS codebase and building from source,
 overlays allow you to download a pre-built vanilla CAS web application server provided by the project itself and override/insert specific behavior into it.
@@ -226,4 +226,4 @@ by using a `scope=import` dependency:
 To take advantage of the CAS BOM via Gradle, please [use this guide](https://plugins.gradle.org/plugin/io.spring.dependency-management) 
 and configure the Gradle build accordingly.
 
-*(1) http://maven.apache.org/plugins/maven-war-plugin/overlays.html*
+*(1) [WAR Overlays](http://maven.apache.org/plugins/maven-war-plugin/overlays.html)*

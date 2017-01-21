@@ -22,14 +22,7 @@ import java.util.stream.Collectors;
  * @since 4.1
  */
 public class DefaultCasProtocolAttributeEncoder extends AbstractProtocolAttributeEncoder {
-
-    /**
-     * Instantiates a new Default cas attribute encoder.
-     */
-    protected DefaultCasProtocolAttributeEncoder() {
-        super();
-    }
-
+    
     /**
      * Instantiates a new Default cas attribute encoder.
      *
@@ -131,7 +124,7 @@ public class DefaultCasProtocolAttributeEncoder extends AbstractProtocolAttribut
                 .map(s -> Pair.of(s.replace(':', '_'), attributes.get(s)))
                 .collect(Collectors.toSet());
         if (!attrs.isEmpty()) {
-            logger.debug("Found {} attribute(s) that need to be sanitized/encoded.");
+            logger.debug("Found {} attribute(s) that need to be sanitized/encoded.", attrs);
             attributes.entrySet().removeIf(s -> s.getKey().contains(":"));
             attrs.forEach(p -> {
                 logger.debug("Sanitized attribute name to be {}", p.getKey());

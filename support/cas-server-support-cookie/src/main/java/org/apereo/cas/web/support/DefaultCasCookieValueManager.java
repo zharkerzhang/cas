@@ -20,6 +20,7 @@ import java.io.Serializable;
  * @since 4.1
  */
 public class DefaultCasCookieValueManager implements CookieValueManager {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCasCookieValueManager.class);
     private static final char COOKIE_FIELD_SEPARATOR = '@';
     private static final int COOKIE_FIELDS_LENGTH = 3;
@@ -40,11 +41,10 @@ public class DefaultCasCookieValueManager implements CookieValueManager {
 
     @Override
     public String buildCookieValue(final String givenCookieValue, final HttpServletRequest request) {
-        final StringBuilder builder = new StringBuilder(givenCookieValue);
-
         final ClientInfo clientInfo = ClientInfoHolder.getClientInfo();
-        builder.append(COOKIE_FIELD_SEPARATOR);
-        builder.append(clientInfo.getClientIpAddress());
+        final StringBuilder builder = new StringBuilder(givenCookieValue)
+                .append(COOKIE_FIELD_SEPARATOR)
+                .append(clientInfo.getClientIpAddress());
         
         final String userAgent = WebUtils.getHttpServletRequestUserAgent(request);
         if (StringUtils.isBlank(userAgent)) {

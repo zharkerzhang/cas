@@ -8,17 +8,15 @@ import org.apereo.cas.authentication.principal.DefaultWebApplicationResponseBuil
 import org.apereo.cas.authentication.principal.PersistentIdGenerator;
 import org.apereo.cas.authentication.principal.ResponseBuilder;
 import org.apereo.cas.authentication.principal.ResponseBuilderLocator;
-import org.apereo.cas.authentication.principal.ServiceFactory;
 import org.apereo.cas.authentication.principal.ShibbolethCompatiblePersistentIdGenerator;
 import org.apereo.cas.authentication.principal.WebApplicationService;
-import org.apereo.cas.authentication.principal.WebApplicationServiceFactory;
 import org.apereo.cas.authentication.principal.WebApplicationServiceResponseBuilder;
 import org.apereo.cas.authentication.support.DefaultCasProtocolAttributeEncoder;
 import org.apereo.cas.authentication.support.NoOpProtocolAttributeEncoder;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.services.AbstractResourceBasedServiceRegistryDao;
 import org.apereo.cas.services.DefaultServicesManager;
-import org.apereo.cas.services.InMemoryServiceRegistryDao;
+import org.apereo.cas.services.InMemoryServiceRegistry;
 import org.apereo.cas.services.RegisteredServiceCipherExecutor;
 import org.apereo.cas.services.ServiceRegistryDao;
 import org.apereo.cas.services.ServiceRegistryInitializer;
@@ -36,7 +34,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -74,12 +71,7 @@ public class CasCoreServicesConfiguration {
     public PersistentIdGenerator shibbolethCompatiblePersistentIdGenerator() {
         return new ShibbolethCompatiblePersistentIdGenerator();
     }
-
-    @Bean
-    public ServiceFactory webApplicationServiceFactory() {
-        return new WebApplicationServiceFactory();
-    }
-
+    
     @Bean
     public ResponseBuilderLocator webApplicationResponseBuilderLocator() {
         return new DefaultWebApplicationResponseBuilderLocator();
@@ -115,7 +107,7 @@ public class CasCoreServicesConfiguration {
     @ConditionalOnMissingBean(name = BEAN_NAME_SERVICE_REGISTRY_DAO)
     @Bean(name = {BEAN_NAME_SERVICE_REGISTRY_DAO, "inMemoryServiceRegistryDao"})
     public ServiceRegistryDao inMemoryServiceRegistryDao() {
-        final InMemoryServiceRegistryDao impl = new InMemoryServiceRegistryDao();
+        final InMemoryServiceRegistry impl = new InMemoryServiceRegistry();
         if (context.containsBean("inMemoryRegisteredServices")) {
             final List list = context.getBean("inMemoryRegisteredServices", List.class);
             impl.setRegisteredServices(list);
@@ -141,14 +133,7 @@ public class CasCoreServicesConfiguration {
             throw Throwables.propagate(e);
         }
     }
-
-    @Bean
-    public List<ServiceFactory> serviceFactoryList() {
-        final List<ServiceFactory> list = new ArrayList<>();
-        list.add(webApplicationServiceFactory());
-        return list;
-    }
-
+    
     /**
      * The embedded service registry that processes built-in JSON service files
      * on the classpath.

@@ -1,6 +1,7 @@
 package org.apereo.cas.config;
 
 import org.apereo.cas.audit.spi.config.CasCoreAuditConfiguration;
+import org.apereo.cas.config.support.CasWebApplicationServiceFactoryConfiguration;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.logging.config.CasLoggingConfiguration;
 import org.apereo.cas.logout.config.CasCoreLogoutConfiguration;
@@ -60,8 +61,16 @@ import static org.junit.Assert.*;
                 CasWebAppConfiguration.class,
                 CasWebflowContextConfigurationTests.TestWebflowContextConfiguration.class,
                 CasWebflowContextConfiguration.class,
+                CasDefaultServiceTicketIdGeneratorsConfiguration.class,
+                CasWebApplicationServiceFactoryConfiguration.class,
                 CasCoreWebflowConfiguration.class,
                 CasCoreAuthenticationConfiguration.class,
+                CasCoreAuthenticationPrincipalConfiguration.class,
+                CasCoreAuthenticationPolicyConfiguration.class,
+                CasCoreAuthenticationMetadataConfiguration.class,
+                CasCoreAuthenticationSupportConfiguration.class,
+                CasCoreAuthenticationHandlersConfiguration.class,
+                CasCoreHttpConfiguration.class,
                 CasCoreTicketsConfiguration.class,
                 CasThemesConfiguration.class,
                 CasLoggingConfiguration.class,
@@ -103,9 +112,7 @@ public class CasWebflowContextConfigurationTests {
     public void verifyFlowExecutorByServerSession() {
         final RequestContext ctx = getMockRequestContext();
         final LocalAttributeMap map = new LocalAttributeMap<>();
-        flowExecutorViaServerSessionBindingExecution.launchExecution("login",
-                map,
-                ctx.getExternalContext());
+        flowExecutorViaServerSessionBindingExecution.launchExecution("login", map, ctx.getExternalContext());
 
     }
 
@@ -113,9 +120,7 @@ public class CasWebflowContextConfigurationTests {
     public void verifyFlowExecutorByClient() {
         final RequestContext ctx = getMockRequestContext();
         final LocalAttributeMap map = new LocalAttributeMap<>();
-        flowExecutorViaClientFlowExecution.launchExecution("login",
-                map,
-                ctx.getExternalContext());
+        flowExecutorViaClientFlowExecution.launchExecution("login", map, ctx.getExternalContext());
     }
 
     private RequestContext getMockRequestContext() {
@@ -130,7 +135,7 @@ public class CasWebflowContextConfigurationTests {
     @Configuration("testWebflowContextConfiguration")
     public static class TestWebflowContextConfiguration {
         @Bean
-        public Action testWebflow() {
+        public Action testWebflowSerialization() {
             return new AbstractAction() {
                 @Override
                 protected Event doExecute(final RequestContext requestContext) throws Exception {

@@ -14,7 +14,8 @@ import org.junit.runners.Suite;
  * @since 4.2.0
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({QueryAndEncodeDatabaseAuthenticationHandlerTests.class, QueryDatabaseAuthenticationHandlerTests.class,
+@Suite.SuiteClasses({QueryAndEncodeDatabaseAuthenticationHandlerTests.class, 
+        QueryDatabaseAuthenticationHandlerTests.class,
         SearchModeSearchDatabaseAuthenticationHandlerTests.class})
 public class AllTestsSuite {
 }

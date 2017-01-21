@@ -23,8 +23,10 @@ import org.apereo.inspektr.audit.AuditActionContext;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -56,29 +58,39 @@ import java.util.Set;
 @RequestMapping("/status/logging")
 public class LoggingConfigController {
     private static StringBuilder LOG_OUTPUT = new StringBuilder();
-    
+
     private static final Object LOCK = new Object();
 
     private static final String VIEW_CONFIG = "monitoring/viewLoggingConfig";
     private static final String LOGGER_NAME_ROOT = "root";
 
-    @Value("${logging.config:classpath:log4j2.xml}")
-    private Resource logConfigurationFile;
-
     private LoggerContext loggerContext;
 
-    private DelegatingAuditTrailManager auditTrailManager;
+    private final DelegatingAuditTrailManager auditTrailManager;
 
-    public void setAuditTrailManager(final DelegatingAuditTrailManager auditTrailManager) {
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ResourceLoader resourceLoader;
+
+    private Resource logConfigurationFile;
+
+    public LoggingConfigController(final DelegatingAuditTrailManager auditTrailManager) {
         this.auditTrailManager = auditTrailManager;
     }
 
     /**
-     * Init.
+     * Init. Attempts to locate the logging configuration to insert listeners.
+     * The log configuration location is pulled directly from the environment
+     * given there is not an explicit property mapping for it provided by Boot, etc.
      */
     @PostConstruct
     public void initialize() {
         try {
+            final String logFile = environment.getProperty("logging.config");
+            this.logConfigurationFile = this.resourceLoader.getResource(logFile);
+
             this.loggerContext = Configurator.initialize("CAS", null, this.logConfigurationFile.getURI());
             this.loggerContext.getConfiguration().addListener(reconfigurable -> loggerContext.updateLoggers(reconfigurable.reconfigure()));
             registerLogFileTailThreads();
@@ -136,9 +148,7 @@ public class LoggingConfigController {
      */
     @GetMapping(value = "/getActiveLoggers")
     @ResponseBody
-    public Map<String, Object> getActiveLoggers(final HttpServletRequest request,
-                                                final HttpServletResponse response)
-            throws Exception {
+    public Map<String, Object> getActiveLoggers(final HttpServletRequest request, final HttpServletResponse response) throws Exception {
         final Map<String, Object> responseMap = new HashMap<>();
         final Map<String, Logger> loggers = getActiveLoggersInFactory();
         responseMap.put("activeLoggers", loggers.values());
@@ -206,7 +216,7 @@ public class LoggingConfigController {
 
             configuredLoggers.add(loggerMap);
         }
-        final Map<String, Object> responseMap = new HashMap();
+        final Map<String, Object> responseMap = new HashMap<>();
         responseMap.put("loggers", configuredLoggers);
         return responseMap;
     }
@@ -222,7 +232,6 @@ public class LoggingConfigController {
     private static ILoggerFactory getCasLoggerFactoryInstance() {
         return LoggerFactory.getILoggerFactory();
     }
-
 
     /**
      * Gets logger configurations.
