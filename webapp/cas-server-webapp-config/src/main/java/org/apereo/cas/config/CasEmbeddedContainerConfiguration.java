@@ -7,7 +7,6 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.valves.ExtendedAccessLogValve;
 import org.apache.catalina.valves.rewrite.RewriteValve;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.coyote.AbstractProtocol;
 import org.apache.coyote.http2.Http2Protocol;
 import org.apereo.cas.configuration.CasConfigurationProperties;
 import org.apereo.cas.configuration.model.core.CasServerProperties;
@@ -66,7 +65,6 @@ public class CasEmbeddedContainerConfiguration {
 
         configureAjp(tomcat);
         configureHttp(tomcat);
-        configureTimeouts(tomcat);
         configureExtendedAccessLog(tomcat);
         configureRewriteValve(tomcat);
 
@@ -122,17 +120,6 @@ public class CasEmbeddedContainerConfiguration {
         }
     }
 
-    private void configureTimeouts(final TomcatEmbeddedServletContainerFactory tomcat) {
-        tomcat.getAdditionalTomcatConnectors()
-                .stream()
-                .filter(connector -> connector.getProtocolHandler() instanceof AbstractProtocol)
-                .forEach(connector -> {
-                    connector.addUpgradeProtocol(new Http2Protocol());
-                    final AbstractProtocol handler = (AbstractProtocol) connector.getProtocolHandler();
-                    handler.setSoTimeout(casProperties.getServer().getConnectionTimeout());
-                    handler.setConnectionTimeout(casProperties.getServer().getConnectionTimeout());
-                });
-    }
 
     private void configureHttp(final TomcatEmbeddedServletContainerFactory tomcat) {
         if (casProperties.getServer().getHttp().isEnabled()) {
@@ -144,7 +131,7 @@ public class CasEmbeddedContainerConfiguration {
                 LOGGER.warn("No explicit port configuration is provided to CAS. Scanning for available ports...");
                 port = SocketUtils.findAvailableTcpPort();
             }
-            LOGGER.debug("Set embedded tomcat container HTTP port to {}", port);
+            LOGGER.debug("Set embedded tomcat container HTTP port to [{}]", port);
             connector.setPort(port);
 
             LOGGER.debug("Configuring embedded tomcat container for HTTP2 protocol support");
@@ -169,12 +156,12 @@ public class CasEmbeddedContainerConfiguration {
             ajpConnector.addUpgradeProtocol(new Http2Protocol());
 
             if (ajp.getProxyPort() > 0) {
-                LOGGER.debug("Set AJP proxy port to {}", ajp.getProxyPort());
+                LOGGER.debug("Set AJP proxy port to [{}]", ajp.getProxyPort());
                 ajpConnector.setProxyPort(ajp.getProxyPort());
             }
 
             if (ajp.getRedirectPort() > 0) {
-                LOGGER.debug("Set AJP redirect port to {}", ajp.getRedirectPort());
+                LOGGER.debug("Set AJP redirect port to [{}]", ajp.getRedirectPort());
                 ajpConnector.setRedirectPort(ajp.getRedirectPort());
             }
             tomcat.addAdditionalTomcatConnectors(ajpConnector);

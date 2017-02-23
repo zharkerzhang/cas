@@ -1,10 +1,12 @@
+@import "mixins";
+
 // This sets a default background color for all btn-social implementations.  The actual provider style will
 // override this with their own colors.  This is use as a fallback for unknown social types.
 .btn-social {
   background-color: slategray;
 }
 
-@import "vendor/bootstrap-social/bootstrap-social";
+@import "../vendor/bootstrap-social/bootstrap-social";
 
 /**
  * Add in our own custom social colors.

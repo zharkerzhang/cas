@@ -2,8 +2,11 @@ package org.apereo.cas.authentication.principal;
 
 import org.apereo.cas.authentication.CoreAuthenticationTestUtils;
 import org.apereo.cas.authentication.Credential;
-import org.apereo.cas.authentication.EchoingPrincipalResolver;
 import org.apereo.cas.authentication.PrincipalException;
+import org.apereo.cas.authentication.handler.support.SimpleTestUsernamePasswordAuthenticationHandler;
+import org.apereo.cas.authentication.principal.resolvers.ChainingPrincipalResolver;
+import org.apereo.cas.authentication.principal.resolvers.EchoingPrincipalResolver;
+import org.apereo.cas.authentication.principal.resolvers.PersonDirectoryPrincipalResolver;
 import org.apereo.cas.util.CollectionUtils;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,7 +33,7 @@ public class PersonDirectoryPrincipalResolverTests {
     @Test
     public void verifyNullPrincipal() {
         final PersonDirectoryPrincipalResolver resolver = new PersonDirectoryPrincipalResolver();
-        final Principal p = resolver.resolve(() -> null, CoreAuthenticationTestUtils.getPrincipal());
+        final Principal p = resolver.resolve(() -> null, CoreAuthenticationTestUtils.getPrincipal(), new SimpleTestUsernamePasswordAuthenticationHandler());
         assertNull(p);
     }
 
@@ -76,7 +79,8 @@ public class PersonDirectoryPrincipalResolverTests {
         attributes.put("cn", "changedCN");
         attributes.put("attr1", "value1");
         final Principal p = chain.resolve(CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword(),
-                CoreAuthenticationTestUtils.getPrincipal(CoreAuthenticationTestUtils.CONST_USERNAME, attributes));
+                CoreAuthenticationTestUtils.getPrincipal(CoreAuthenticationTestUtils.CONST_USERNAME, attributes),
+                new SimpleTestUsernamePasswordAuthenticationHandler());
         assertEquals(p.getAttributes().size(), CoreAuthenticationTestUtils.getAttributeRepository().getPossibleUserAttributeNames().size() + 1);
         assertTrue(p.getAttributes().containsKey("attr1"));
         assertTrue(p.getAttributes().containsKey("cn"));
@@ -92,7 +96,8 @@ public class PersonDirectoryPrincipalResolverTests {
         chain.setChain(Arrays.asList(resolver, new EchoingPrincipalResolver()));
         final Principal p = chain.resolve(CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword(),
                 CoreAuthenticationTestUtils.getPrincipal(CoreAuthenticationTestUtils.CONST_USERNAME,
-                        Collections.singletonMap("attr1", "value")));
+                        Collections.singletonMap("attr1", "value")),
+                new SimpleTestUsernamePasswordAuthenticationHandler());
         assertEquals(p.getAttributes().size(), CoreAuthenticationTestUtils.getAttributeRepository().getPossibleUserAttributeNames().size() + 1);
         assertTrue(p.getAttributes().containsKey("attr1"));
     }
@@ -106,9 +111,8 @@ public class PersonDirectoryPrincipalResolverTests {
         chain.setChain(Arrays.asList(resolver, new EchoingPrincipalResolver()));
 
         this.thrown.expect(PrincipalException.class);
-        this.thrown.expectMessage("Resolved principals by the chain are not unique");
-
         chain.resolve(CoreAuthenticationTestUtils.getCredentialsWithSameUsernameAndPassword(),
-                CoreAuthenticationTestUtils.getPrincipal("somethingelse", Collections.singletonMap("attr1", "value")));
+                CoreAuthenticationTestUtils.getPrincipal("somethingelse", Collections.singletonMap("attr1", "value")),
+                new SimpleTestUsernamePasswordAuthenticationHandler());
     }
 }

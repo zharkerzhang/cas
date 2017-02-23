@@ -75,7 +75,7 @@
                         <span class="tooltiptext" th:text="#{cas.dashboard.tooltip.stats}"></span>
                     </a>
                 </li>
-                <li>
+                <li th:if="${environmentEndpointEnabled}">
                     <a th:href="@{/status/config}" class="casTooltip">Config Panel
                         <span class="tooltiptext" th:text="#{cas.dashboard.tooltip.configpanel}"></span>
                     </a>
@@ -86,8 +86,18 @@
                     </a>
                 </li>
                 <li>
+                    <a th:href="@{/status/sso}" class="casTooltip">SSO Status
+                        <span class="tooltiptext" th:text="#{cas.dashboard.tooltip.ssostatus}"></span>
+                    </a>
+                </li>
+                <li>
                     <a th:href="@{/status/logging}" class="casTooltip">Logging
                         <span class="tooltiptext" th:text="#{cas.dashboard.tooltip.logging}"></span>
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/status/attrresolution}" class="casTooltip">Attribute Resolution
+                        <span class="tooltiptext" th:text="#{cas.dashboard.tooltip.attrresolution}"></span>
                     </a>
                 </li>
                 <li th:if="${trustedDevicesEnabled}">
@@ -105,8 +115,8 @@
         <div class="app-launcher server-config">
             <h2 th:inline="text"><i class="fa fa-cogs"></i>[[#{cas.dashboard.section.configuration.title}]]</h2>
             <ul class="configserver">
-                <li th:if="${isDefaultProfile}"><a th:href="@{/configserver/cas/default}">Default Profile</a></li>
-                <li th:if="${isNativeProfile}"><a th:href="@{/configserver/cas/native}">Native Profile</a></li>
+                <li th:if="${isDefaultProfile}"><a th:href="@{/status/configserver/cas/default}">Default Profile</a></li>
+                <li th:if="${isNativeProfile}"><a th:href="@{/status/configserver/cas/native}">Native Profile</a></li>
             </ul>
         </div>
 

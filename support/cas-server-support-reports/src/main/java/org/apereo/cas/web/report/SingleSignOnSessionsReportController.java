@@ -11,10 +11,9 @@ import org.apereo.cas.util.ISOStandardDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.boot.actuate.endpoint.mvc.AbstractNamedMvcEndpoint;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.async.WebAsyncTask;
@@ -36,9 +35,7 @@ import java.util.concurrent.Callable;
  * @author Dmitriy Kopylenko
  * @since 4.1
  */
-@Controller("singleSignOnSessionsReportController")
-@RequestMapping(value = "/status/ssosessions")
-public class SingleSignOnSessionsReportController {
+public class SingleSignOnSessionsReportController extends AbstractNamedMvcEndpoint {
 
     private static final String VIEW_SSO_SESSIONS = "monitoring/viewSsoSessions";
     private static final String STATUS = "status";
@@ -47,7 +44,7 @@ public class SingleSignOnSessionsReportController {
 
     @Autowired
     private CasConfigurationProperties casProperties;
-    
+
     private enum SsoSessionReportOptions {
         ALL("all"),
         PROXIED("proxied"),
@@ -109,6 +106,7 @@ public class SingleSignOnSessionsReportController {
     private final CentralAuthenticationService centralAuthenticationService;
 
     public SingleSignOnSessionsReportController(final CentralAuthenticationService centralAuthenticationService) {
+        super("ssosessions", "/ssosessions", true, true);
         this.centralAuthenticationService = centralAuthenticationService;
     }
 
@@ -122,16 +120,10 @@ public class SingleSignOnSessionsReportController {
         final Collection<Map<String, Object>> activeSessions = new ArrayList<>();
         final ISOStandardDateFormat dateFormat = new ISOStandardDateFormat();
 
-        for (final Ticket ticket : getNonExpiredTicketGrantingTickets()) {
-            final TicketGrantingTicket tgt = (TicketGrantingTicket) ticket;
-
-            if (option == SsoSessionReportOptions.DIRECT && tgt.getProxiedBy() != null) {
-                continue;
-            }
-
+        getNonExpiredTicketGrantingTickets().stream().map(TicketGrantingTicket.class::cast)
+                .filter(tgt -> !(option == SsoSessionReportOptions.DIRECT && tgt.getProxiedBy() != null)).forEach(tgt -> {
             final Authentication authentication = tgt.getAuthentication();
             final Principal principal = authentication.getPrincipal();
-
             final Map<String, Object> sso = new HashMap<>(SsoSessionAttributeKeys.values().length);
             sso.put(SsoSessionAttributeKeys.AUTHENTICATED_PRINCIPAL.toString(), principal.getId());
             sso.put(SsoSessionAttributeKeys.AUTHENTICATION_DATE.toString(), authentication.getAuthenticationDate());
@@ -141,7 +133,6 @@ public class SingleSignOnSessionsReportController {
             sso.put(SsoSessionAttributeKeys.TICKET_GRANTING_TICKET.toString(), tgt.getId());
             sso.put(SsoSessionAttributeKeys.PRINCIPAL_ATTRIBUTES.toString(), principal.getAttributes());
             sso.put(SsoSessionAttributeKeys.AUTHENTICATION_ATTRIBUTES.toString(), authentication.getAttributes());
-
             if (option != SsoSessionReportOptions.DIRECT) {
                 if (tgt.getProxiedBy() != null) {
                     sso.put(SsoSessionAttributeKeys.IS_PROXIED.toString(), Boolean.TRUE);
@@ -150,11 +141,9 @@ public class SingleSignOnSessionsReportController {
                     sso.put(SsoSessionAttributeKeys.IS_PROXIED.toString(), Boolean.FALSE);
                 }
             }
-
             sso.put(SsoSessionAttributeKeys.AUTHENTICATED_SERVICES.toString(), tgt.getServices());
-
             activeSessions.add(sso);
-        }
+        });
         return activeSessions;
     }
 
@@ -257,16 +246,14 @@ public class SingleSignOnSessionsReportController {
 
         final SsoSessionReportOptions option = SsoSessionReportOptions.valueOf(type);
         final Collection<Map<String, Object>> collection = getActiveSsoSessions(option);
-        for (final Map<String, Object> sso : collection) {
-            final String ticketGrantingTicket =
-                    sso.get(SsoSessionAttributeKeys.TICKET_GRANTING_TICKET.toString()).toString();
+        collection.stream().map(sso -> sso.get(SsoSessionAttributeKeys.TICKET_GRANTING_TICKET.toString()).toString()).forEach(ticketGrantingTicket -> {
             try {
                 this.centralAuthenticationService.destroyTicketGrantingTicket(ticketGrantingTicket);
             } catch (final Exception e) {
                 LOGGER.error(e.getMessage(), e);
                 failedTickets.put(ticketGrantingTicket, e.getMessage());
             }
-        }
+        });
 
         if (failedTickets.isEmpty()) {
             sessionsMap.put(STATUS, HttpServletResponse.SC_OK);

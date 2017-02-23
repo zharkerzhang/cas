@@ -38,6 +38,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -64,9 +65,8 @@ public class JpaTicketRegistryTests {
 
     private static final ExpirationPolicy EXP_POLICY_PT = new MultiTimeUseOrTimeoutExpirationPolicy(1, 2000);
 
-    /** Logger instance. */
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTicketRegistryTests.class);
+    
     @Autowired
     @Qualifier("ticketTransactionManager")
     private PlatformTransactionManager txManager;
@@ -162,15 +162,15 @@ public class JpaTicketRegistryTests {
         final ExecutorService executor = Executors.newFixedThreadPool(CONCURRENT_SIZE);
         try {
             final List<ServiceTicketGenerator> generators = new ArrayList<>(CONCURRENT_SIZE);
-            for (int i = 0; i < CONCURRENT_SIZE; i++) {
-                generators.add(new ServiceTicketGenerator(newTgt.getId(), this.ticketRegistry, this.txManager));
-            }
+            IntStream.range(0, CONCURRENT_SIZE)
+                    .mapToObj(i -> new ServiceTicketGenerator(newTgt.getId(), this.ticketRegistry, this.txManager))
+                    .forEach(generators::add);
             final List<Future<String>> results = executor.invokeAll(generators);
             for (final Future<String> result : results) {
                 assertNotNull(result.get());
             }
         } catch (final Exception e) {
-            logger.error("testConcurrentServiceTicketGeneration produced an error", e);
+            LOGGER.error("testConcurrentServiceTicketGeneration produced an error", e);
             fail("testConcurrentServiceTicketGeneration failed.");
         } finally {
             executor.shutdownNow();

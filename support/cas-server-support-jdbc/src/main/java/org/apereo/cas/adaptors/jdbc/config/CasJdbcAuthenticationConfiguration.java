@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -67,14 +68,11 @@ public class CasJdbcAuthenticationConfiguration {
     @Bean
     public Collection<AuthenticationHandler> jdbcAuthenticationHandlers() {
         final Collection<AuthenticationHandler> handlers = new HashSet<>();
-        casProperties.getAuthn().getJdbc()
-                .getBind().forEach(b -> handlers.add(bindModeSearchDatabaseAuthenticationHandler(b)));
-        casProperties.getAuthn().getJdbc()
-                .getEncode().forEach(b -> handlers.add(queryAndEncodeDatabaseAuthenticationHandler(b)));
-        casProperties.getAuthn().getJdbc()
-                .getQuery().forEach(b -> handlers.add(queryDatabaseAuthenticationHandler(b)));
-        casProperties.getAuthn().getJdbc()
-                .getSearch().forEach(b -> handlers.add(searchModeSearchDatabaseAuthenticationHandler(b)));
+        final JdbcAuthenticationProperties jdbc = casProperties.getAuthn().getJdbc();
+        jdbc.getBind().forEach(b -> handlers.add(bindModeSearchDatabaseAuthenticationHandler(b)));
+        jdbc.getEncode().forEach(b -> handlers.add(queryAndEncodeDatabaseAuthenticationHandler(b)));
+        jdbc.getQuery().forEach(b -> handlers.add(queryDatabaseAuthenticationHandler(b)));
+        jdbc.getSearch().forEach(b -> handlers.add(searchModeSearchDatabaseAuthenticationHandler(b)));
         return handlers;
     }
 
@@ -99,13 +97,15 @@ public class CasJdbcAuthenticationConfiguration {
         }
         h.setName(b.getName());
 
-        LOGGER.debug("Created authentication handler {} to handle database url at {}", h.getName(), b.getUrl());
+        LOGGER.debug("Created authentication handler [{}] to handle database url at [{}]", h.getName(), b.getUrl());
         return h;
     }
 
     private AuthenticationHandler queryAndEncodeDatabaseAuthenticationHandler(final JdbcAuthenticationProperties.Encode b) {
         final QueryAndEncodeDatabaseAuthenticationHandler h = new QueryAndEncodeDatabaseAuthenticationHandler(b.getAlgorithmName(), b.getSql(),
-                b.getPasswordFieldName(), b.getSaltFieldName(), b.getNumberOfIterationsFieldName(), b.getNumberOfIterations(), b.getStaticSalt());
+                b.getPasswordFieldName(), b.getSaltFieldName(), b.getExpiredFieldName(),
+                b.getDisabledFieldName(), b.getNumberOfIterationsFieldName(), b.getNumberOfIterations(),
+                b.getStaticSalt());
 
         h.setOrder(b.getOrder());
         h.setDataSource(Beans.newHickariDataSource(b));
@@ -128,12 +128,18 @@ public class CasJdbcAuthenticationConfiguration {
         }
         h.setName(b.getName());
 
-        LOGGER.debug("Created authentication handler {} to handle database url at {}", h.getName(), b.getUrl());
+        LOGGER.debug("Created authentication handler [{}] to handle database url at [{}]", h.getName(), b.getUrl());
         return h;
     }
 
     private AuthenticationHandler queryDatabaseAuthenticationHandler(final JdbcAuthenticationProperties.Query b) {
-        final QueryDatabaseAuthenticationHandler h = new QueryDatabaseAuthenticationHandler(b.getSql());
+        final Map<String, String> attributes = Beans.transformPrincipalAttributesListIntoMap(b.getPrincipalAttributeList());
+        attributes.putAll(casProperties.getAuthn().getAttributeRepository().getAttributes());
+        LOGGER.debug("Created and mapped principal attributes [{}] for [{}]...", attributes, b.getUrl());
+        
+        final QueryDatabaseAuthenticationHandler h = new QueryDatabaseAuthenticationHandler(b.getSql(),
+                b.getFieldPassword(), b.getFieldExpired(), b.getFieldDisabled(), attributes);
+        
         h.setOrder(b.getOrder());
         h.setDataSource(Beans.newHickariDataSource(b));
         h.setPasswordEncoder(Beans.newPasswordEncoder(b.getPasswordEncoder()));
@@ -153,7 +159,7 @@ public class CasJdbcAuthenticationConfiguration {
         }
         h.setName(b.getName());
 
-        LOGGER.debug("Created authentication handler {} to handle database url at {}", h.getName(), b.getUrl());
+        LOGGER.debug("Created authentication handler [{}] to handle database url at [{}]", h.getName(), b.getUrl());
         return h;
     }
 
@@ -182,7 +188,7 @@ public class CasJdbcAuthenticationConfiguration {
         }
         h.setName(b.getName());
 
-        LOGGER.debug("Created authentication handler {} to handle database url at {}", h.getName(), b.getUrl());
+        LOGGER.debug("Created authentication handler [{}] to handle database url at [{}]", h.getName(), b.getUrl());
         return h;
     }
 

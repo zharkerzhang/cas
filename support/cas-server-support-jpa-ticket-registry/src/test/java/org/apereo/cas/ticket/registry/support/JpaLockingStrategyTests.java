@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -50,9 +51,9 @@ public class JpaLockingStrategyTests {
      * Number of clients contending for lock in concurrent test.
      */
     private static final int CONCURRENT_SIZE = 13;
-    
-    private final transient Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaLockingStrategyTests.class);
+    
     @Autowired
     @Qualifier("ticketTransactionManager")
     private PlatformTransactionManager txManager;
@@ -86,7 +87,7 @@ public class JpaLockingStrategyTests {
             lock.release();
             assertNull(getOwner(appId));
         } catch (final Exception e) {
-            logger.debug("testAcquireAndRelease produced an error", e);
+            LOGGER.debug("testAcquireAndRelease produced an error", e);
             fail("testAcquireAndRelease failed");
         }
     }
@@ -111,7 +112,7 @@ public class JpaLockingStrategyTests {
             lock.release();
             assertNull(getOwner(appId));
         } catch (final Exception e) {
-            logger.debug("testLockExpiration produced an error", e);
+            LOGGER.debug("testLockExpiration produced an error", e);
             fail("testLockExpiration failed");
         }
     }
@@ -131,7 +132,7 @@ public class JpaLockingStrategyTests {
             lock.release();
             assertNull(getOwner(appId));
         } catch (final Exception e) {
-            logger.debug("testNonReentrantBehavior produced an error", e);
+            LOGGER.debug("testNonReentrantBehavior produced an error", e);
             fail("testNonReentrantBehavior failed.");
         }
     }
@@ -145,7 +146,7 @@ public class JpaLockingStrategyTests {
         try {
             testConcurrency(executor, Arrays.asList(getConcurrentLocks("concurrent-new")));
         } catch (final Exception e) {
-            logger.debug("testConcurrentAcquireAndRelease produced an error", e);
+            LOGGER.debug("testConcurrentAcquireAndRelease produced an error", e);
             fail("testConcurrentAcquireAndRelease failed.");
         } finally {
             executor.shutdownNow();
@@ -164,7 +165,7 @@ public class JpaLockingStrategyTests {
         try {
             testConcurrency(executor, Arrays.asList(locks));
         } catch (final Exception e) {
-            logger.debug("testConcurrentAcquireAndReleaseOnExistingLock produced an error", e);
+            LOGGER.debug("testConcurrentAcquireAndReleaseOnExistingLock produced an error", e);
             fail("testConcurrentAcquireAndReleaseOnExistingLock failed.");
         } finally {
             executor.shutdownNow();
@@ -173,9 +174,8 @@ public class JpaLockingStrategyTests {
 
     private LockingStrategy[] getConcurrentLocks(final String appId) {
         final LockingStrategy[] locks = new LockingStrategy[CONCURRENT_SIZE];
-        for (int i = 1; i <= locks.length; i++) {
-            locks[i - 1] = newLockTxProxy(appId, appId + '-' + i, JpaTicketRegistryProperties.DEFAULT_LOCK_TIMEOUT);
-        }
+        IntStream.rangeClosed(1, locks.length)
+                .forEach(i -> locks[i - 1] = newLockTxProxy(appId, appId + '-' + i, JpaTicketRegistryProperties.DEFAULT_LOCK_TIMEOUT));
         return locks;
     }
 
@@ -226,7 +226,8 @@ public class JpaLockingStrategyTests {
     }
 
     private static class TransactionalLockInvocationHandler implements InvocationHandler {
-        private final transient Logger logger = LoggerFactory.getLogger(this.getClass());
+        private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalLockInvocationHandler.class);
+        
         private final JpaLockingStrategy jpaLock;
         private final PlatformTransactionManager txManager;
 
@@ -246,7 +247,7 @@ public class JpaLockingStrategyTests {
                 try {
                     final Object result = method.invoke(jpaLock, args);
                     jpaLock.entityManager.flush();
-                    logger.debug("Performed {} on {}", method.getName(), jpaLock);
+                    LOGGER.debug("Performed [{}] on [{}]", method.getName(), jpaLock);
                     return result;
                     // Force result of transaction to database
                 } catch (final Exception e) {
@@ -258,7 +259,8 @@ public class JpaLockingStrategyTests {
     }
 
     private static class Locker implements Callable<Boolean> {
-        private final transient Logger logger = LoggerFactory.getLogger(this.getClass());
+        private static final Logger LOGGER = LoggerFactory.getLogger(Locker.class);
+        
         private final LockingStrategy lock;
 
         Locker(final LockingStrategy l) {
@@ -270,14 +272,15 @@ public class JpaLockingStrategyTests {
             try {
                 return lock.acquire();
             } catch (final Exception e) {
-                logger.debug("{} failed to acquire lock", lock, e);
+                LOGGER.debug("[{}] failed to acquire lock", lock, e);
                 return false;
             }
         }
     }
 
     private static class Releaser implements Callable<Boolean> {
-        private final transient Logger logger = LoggerFactory.getLogger(this.getClass());
+        private static final Logger LOGGER = LoggerFactory.getLogger(Releaser.class);
+        
         private final LockingStrategy lock;
 
         Releaser(final LockingStrategy l) {
@@ -290,7 +293,7 @@ public class JpaLockingStrategyTests {
                 lock.release();
                 return true;
             } catch (final Exception e) {
-                logger.debug("{} failed to release lock", lock, e);
+                LOGGER.debug("[{}] failed to release lock", lock, e);
                 return false;
             }
         }

@@ -1,5 +1,6 @@
 package org.apereo.cas.configuration.model.core.authentication;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apereo.cas.configuration.model.support.jpa.AbstractJpaProperties;
 import org.apereo.cas.configuration.model.support.ldap.AbstractLdapProperties;
 import org.apereo.cas.configuration.support.AbstractConfigProperties;
@@ -24,7 +25,7 @@ public class PrincipalAttributesProperties {
     private int expireInMinutes = 30;
     private int maximumCacheSize = 10000;
     private String merger = "REPLACE";
-    
+
     private Set<String> defaultAttributesToRelease = new HashSet<>();
     private Map<String, String> attributes = new HashMap();
 
@@ -32,6 +33,15 @@ public class PrincipalAttributesProperties {
     private List<Groovy> groovy = new ArrayList();
     private List<Ldap> ldap = new ArrayList();
     private List<Json> json = new ArrayList();
+    private Grouper grouper = new Grouper();
+
+    public Grouper getGrouper() {
+        return grouper;
+    }
+
+    public void setGrouper(final Grouper grouper) {
+        this.grouper = grouper;
+    }
 
     public List<Groovy> getGroovy() {
         return groovy;
@@ -105,6 +115,28 @@ public class PrincipalAttributesProperties {
         this.defaultAttributesToRelease = defaultAttributesToRelease;
     }
 
+    public static class Grouper {
+        private int order;
+        private boolean enabled;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(final boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public int getOrder() {
+            return order;
+        }
+
+        public void setOrder(final int order) {
+            this.order = order;
+        }
+
+    }
+
     public static class Jdbc extends AbstractJpaProperties {
         private String sql;
         private boolean singleRow = true;
@@ -123,13 +155,12 @@ public class PrincipalAttributesProperties {
             this.order = order;
         }
 
-
         public String getSql() {
             return sql;
         }
 
         public void setSql(final String sql) {
-            this.sql = sql;
+            this.sql = StringUtils.replace(sql, "{user}", "?");
         }
 
         public List<String> getUsername() {
@@ -213,7 +244,7 @@ public class PrincipalAttributesProperties {
             this.caseInsensitive = caseInsensitive;
         }
     }
-    
+
     public static class Ldap extends AbstractLdapProperties {
         private boolean subtreeSearch = true;
         private String baseDn;

@@ -2,14 +2,13 @@
 package org.apereo.cas.support.saml.services.idp.metadata;
 
 import net.shibboleth.utilities.java.support.resolver.CriteriaSet;
-import org.apereo.cas.support.saml.SamlException;
+import org.apereo.cas.services.UnauthorizedServiceException;
 import org.apereo.cas.support.saml.SamlIdPUtils;
 import org.apereo.cas.support.saml.services.SamlRegisteredService;
 import org.apereo.cas.support.saml.services.idp.metadata.cache.SamlRegisteredServiceCachingMetadataResolver;
 import org.apereo.cas.util.DateTimeUtils;
 import org.opensaml.core.criterion.EntityIdCriterion;
 import org.opensaml.core.xml.XMLObject;
-import org.opensaml.saml.common.SAMLException;
 import org.opensaml.saml.common.xml.SAMLConstants;
 import org.opensaml.saml.criterion.BindingCriterion;
 import org.opensaml.saml.metadata.resolver.ChainingMetadataResolver;
@@ -87,11 +86,11 @@ public final class SamlRegisteredServiceServiceProviderMetadataFacade {
                                                                          final RequestAbstractType request) {
         return get(resolver, registeredService, SamlIdPUtils.getIssuerFromSamlRequest(request));
     }
-    
+
     private static SamlRegisteredServiceServiceProviderMetadataFacade get(final SamlRegisteredServiceCachingMetadataResolver resolver,
-                                                                         final SamlRegisteredService registeredService,
-                                                                         final String entityID,
-                                                                         final CriteriaSet criterions) {
+                                                                          final SamlRegisteredService registeredService,
+                                                                          final String entityID,
+                                                                          final CriteriaSet criterions) {
         LOGGER.info("Adapting SAML metadata for CAS service [{}] issued by [{}]",
                 registeredService.getName(), entityID);
         try {
@@ -101,12 +100,13 @@ public final class SamlRegisteredServiceServiceProviderMetadataFacade {
             LOGGER.info("Locating metadata for entityID [{}] with binding [{}] by attempting to run through the metadata chain...",
                     entityID, SAMLConstants.SAML2_POST_BINDING_URI);
             final ChainingMetadataResolver chainingMetadataResolver = resolver.resolve(registeredService);
-            LOGGER.info("Resolved metadata chain for service {}. Filtering the chain by entity ID {} and binding {}",
+            LOGGER.info("Resolved metadata chain for service [{}]. Filtering the chain by entity ID [{}] and binding [{}]",
                     registeredService, entityID, SAMLConstants.SAML2_POST_BINDING_URI);
 
             final EntityDescriptor entityDescriptor = chainingMetadataResolver.resolveSingle(criterions);
             if (entityDescriptor == null) {
-                throw new SAMLException("Cannot find entity " + entityID + " in metadata provider.");
+                throw new UnauthorizedServiceException(UnauthorizedServiceException.CODE_UNAUTHZ_SERVICE,
+                        "Cannot find entity " + entityID + " in metadata provider.");
             }
             LOGGER.debug("Located EntityDescriptor in metadata for [{}]", entityID);
             final SPSSODescriptor ssoDescriptor = entityDescriptor.getSPSSODescriptor(SAMLConstants.SAML20P_NS);
@@ -116,7 +116,8 @@ public final class SamlRegisteredServiceServiceProviderMetadataFacade {
                 return new SamlRegisteredServiceServiceProviderMetadataFacade(ssoDescriptor,
                         entityDescriptor, chainingMetadataResolver);
             }
-            throw new SamlException("Could not locate SPSSODescriptor in the metadata for " + entityID);
+            throw new UnauthorizedServiceException(UnauthorizedServiceException.CODE_UNAUTHZ_SERVICE,
+                    "Could not locate SPSSODescriptor in the metadata for " + entityID);
         } catch (final Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
